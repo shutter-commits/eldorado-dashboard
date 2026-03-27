@@ -344,6 +344,15 @@
   }
 
   .badge-pending { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+
+  .det-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text2);
+  }
   .badge-sold { background: rgba(45,255,138,0.12); color: var(--green); border: 1px solid rgba(45,255,138,0.25); }
   .badge-expired { background: rgba(255,77,109,0.12); color: var(--red); border: 1px solid rgba(255,77,109,0.25); }
 
@@ -1559,6 +1568,101 @@
   </div>
 </div>
 
+<!-- MODAL: DETALHES DO PRODUTO -->
+<div class="modal-overlay" id="modal-detalhes-overlay" onclick="if(event.target.id==='modal-detalhes-overlay')fecharDetalhes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div>
+        <h3 id="det-nome" style="font-size:17px;font-weight:800;">Produto</h3>
+        <div id="det-cat" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+      </div>
+      <button class="modal-close" onclick="fecharDetalhes()">✕</button>
+    </div>
+
+    <!-- Status e lote -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="det-badges"></div>
+
+    <!-- Breakdown de taxas -->
+    <div style="background:var(--surface2);border-radius:10px;overflow:hidden;margin-bottom:16px;">
+      <div style="background:var(--surface);padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);border-bottom:1px solid var(--border);">
+        💸 Breakdown Completo de Taxas
+      </div>
+      <div style="padding:4px 0;">
+        <div class="det-row">
+          <span>Preço de venda</span>
+          <div style="text-align:right;">
+            <div id="det-venda-usd" style="font-family:var(--mono);font-weight:700;"></div>
+            <div id="det-venda-brl" style="font-size:11px;color:var(--text2);"></div>
+          </div>
+        </div>
+        <div class="det-row" style="color:var(--red)">
+          <span>Taxa Eldorado (15%)</span>
+          <div style="text-align:right;">
+            <div id="det-taxa-eld" style="font-family:var(--mono);font-weight:600;color:var(--red);"></div>
+            <div id="det-taxa-eld-brl" style="font-size:11px;color:var(--red);opacity:0.7;"></div>
+          </div>
+        </div>
+        <div class="det-row">
+          <span style="color:var(--blue);font-weight:600;">Crédito Payoneer</span>
+          <div style="text-align:right;">
+            <div id="det-payoneer" style="font-family:var(--mono);font-weight:700;color:var(--blue);"></div>
+            <div id="det-payoneer-brl" style="font-size:11px;color:var(--blue);opacity:0.7;"></div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:4px 16px;"></div>
+        <div class="det-row">
+          <span>Taxa Payoneer (4%)</span>
+          <div style="text-align:right;">
+            <div id="det-pay-pct" style="font-family:var(--mono);color:var(--red);"></div>
+            <div id="det-pay-pct-brl" style="font-size:11px;color:var(--red);opacity:0.7;"></div>
+          </div>
+        </div>
+        <div class="det-row">
+          <span>Taxa fixa Payoneer</span>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono);color:var(--red);">- $ 2,00</div>
+            <div id="det-fixa-brl" style="font-size:11px;color:var(--red);opacity:0.7;"></div>
+          </div>
+        </div>
+        <div class="det-row">
+          <span>Taxa transferência (2%)</span>
+          <div style="text-align:right;">
+            <div id="det-transf" style="font-family:var(--mono);color:var(--red);"></div>
+            <div id="det-transf-brl" style="font-size:11px;color:var(--red);opacity:0.7;"></div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:4px 16px;"></div>
+        <div class="det-row" style="padding:12px 16px;">
+          <span style="font-weight:700;color:var(--text);">💰 Líquido final</span>
+          <div style="text-align:right;">
+            <div id="det-liq-usd" style="font-family:var(--mono);font-weight:800;font-size:16px;color:var(--green);"></div>
+            <div id="det-liq-brl" style="font-family:var(--mono);font-weight:700;font-size:13px;color:var(--green);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lucro -->
+    <div id="det-lucro-box" style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:13px;color:var(--text2);">Investido no produto</span>
+        <span id="det-compra" style="font-family:var(--mono);font-weight:600;color:var(--red);"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:14px;font-weight:800;">🏦 Lucro Real Líquido</span>
+        <span id="det-lucro" style="font-family:var(--mono);font-weight:800;font-size:20px;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <span style="font-size:11px;color:var(--text2);">ROI</span>
+        <span id="det-roi" style="font-family:var(--mono);font-weight:700;font-size:13px;"></span>
+      </div>
+    </div>
+
+    <!-- Datas -->
+    <div id="det-datas" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -2279,7 +2383,7 @@ function renderAtivos() {
     const loteNome = p.loteId ? lotes.find(l=>l.id===p.loteId)?.nome : null;
     return `<tr>
       <td class="td-nome">
-        <div style="font-weight:700;font-size:14px;margin-bottom:3px;">${p.nome}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px;cursor:pointer;color:var(--text);" onclick="abrirDetalhes(${p._i})" title="Ver detalhes">${p.nome} <span style="font-size:10px;color:var(--text2);">↗</span></div>
         ${loteNome ? `<span style="font-size:10px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.3);border-radius:10px;padding:2px 8px;color:var(--gold);">📦 ${loteNome}</span>` : ''}
         ${p.obs ? `<div style="color:var(--text2);font-size:11px;margin-top:2px;">${p.obs}</div>` : ''}
       </td>
@@ -2410,7 +2514,7 @@ function renderVendidos() {
     const loteNomeV = p.loteId ? lotes.find(l=>l.id===p.loteId)?.nome : null;
     return `<tr>
       <td class="td-nome">
-        <div style="font-weight:700;font-size:14px;margin-bottom:3px;">${p.nome}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px;cursor:pointer;color:var(--text);" onclick="abrirDetalhes(${p._i})" title="Ver detalhes">${p.nome} <span style="font-size:10px;color:var(--text2);">↗</span></div>
         ${loteNomeV ? `<span style="font-size:10px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.3);border-radius:10px;padding:2px 8px;color:var(--gold);">📦 ${loteNomeV}</span>` : ''}
       </td>
       <td>
@@ -3022,6 +3126,78 @@ async function excluirLote(id) {
   }
 }
 
+// ===== MODAL DETALHES =====
+function abrirDetalhes(idx) {
+  const p = produtos[idx];
+  if (!p) return;
+
+  const t = calcTaxas(p.vendaUSD || 0, p.compra || 0);
+  const brl = v => `R$ ${(v * cotacaoUSD).toFixed(2)}`;
+  const usd = v => `- $ ${v.toFixed(2)}`;
+
+  // Nome e categoria
+  document.getElementById('det-nome').textContent = p.nome;
+  document.getElementById('det-cat').textContent = `${catIcon(p.categoria)} ${p.categoria}`;
+
+  // Badges
+  const lote = p.loteId ? lotes.find(l => l.id === p.loteId) : null;
+  document.getElementById('det-badges').innerHTML = `
+    <span class="badge ${p.status === 'vendido' ? 'badge-sold' : 'badge-pending'}">${p.status === 'vendido' ? '✅ Vendido' : '⏳ Ativo'}</span>
+    ${lote ? `<span class="badge" style="background:rgba(245,200,66,0.1);color:var(--gold);border:1px solid rgba(245,200,66,0.3);">📦 ${lote.nome}</span>` : ''}
+  `;
+
+  // Breakdown taxas
+  document.getElementById('det-venda-usd').textContent = `$ ${(p.vendaUSD||0).toFixed(2)}`;
+  document.getElementById('det-venda-brl').textContent = brl(p.vendaUSD||0);
+  document.getElementById('det-taxa-eld').textContent = usd(t.taxaEldorado);
+  document.getElementById('det-taxa-eld-brl').textContent = `- ${brl(t.taxaEldorado)}`;
+  document.getElementById('det-payoneer').textContent = `$ ${t.creditoPayoneer.toFixed(2)}`;
+  document.getElementById('det-payoneer-brl').textContent = brl(t.creditoPayoneer);
+  document.getElementById('det-pay-pct').textContent = usd(t.taxaPayPct);
+  document.getElementById('det-pay-pct-brl').textContent = `- ${brl(t.taxaPayPct)}`;
+  document.getElementById('det-fixa-brl').textContent = `- ${brl(2)}`;
+  document.getElementById('det-transf').textContent = usd(t.taxaTransf);
+  document.getElementById('det-transf-brl').textContent = `- ${brl(t.taxaTransf)}`;
+  document.getElementById('det-liq-usd').textContent = `$ ${t.liquidoUSD.toFixed(2)}`;
+  document.getElementById('det-liq-brl').textContent = `R$ ${t.liquidoBRL.toFixed(2)}`;
+
+  // Lucro
+  const compra = p.compra || 0;
+  const lucro = t.liquidoBRL - compra;
+  const roi = compra > 0 ? (lucro / compra * 100) : 0;
+  const lucroColor = lucro >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('det-compra').textContent = compra > 0 ? `- R$ ${compra.toFixed(2)}` : 'Produto de lote';
+  const lucroEl = document.getElementById('det-lucro');
+  lucroEl.textContent = `${lucro >= 0 ? '+' : ''}R$ ${lucro.toFixed(2)}`;
+  lucroEl.style.color = lucroColor;
+  const roiEl = document.getElementById('det-roi');
+  roiEl.textContent = compra > 0 ? `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%` : '—';
+  roiEl.style.color = lucroColor;
+
+  // Datas
+  let datasHTML = `<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+    <div style="font-size:10px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Postado</div>
+    <div style="font-family:var(--mono);font-weight:700;">${fmtDate(p.dataPostagem)}</div>
+  </div>`;
+  if (p.status === 'vendido') {
+    datasHTML += `<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Vendido em</div>
+      <div style="font-family:var(--mono);font-weight:700;">${fmtDate(p.dataVenda)}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px;">${p.diasParaVender ?? '--'} dias</div>
+    </div>`;
+  }
+  document.getElementById('det-datas').innerHTML = datasHTML;
+
+  // Abrir modal
+  const overlay = document.getElementById('modal-detalhes-overlay');
+  overlay.style.display = 'flex';
+}
+
+function fecharDetalhes() {
+  document.getElementById('modal-detalhes-overlay').style.display = 'none';
+}
+
 // ===== EXPOR FUNÇÕES AO ESCOPO GLOBAL (fix iframe) =====
 window.openModal = openModal;
 window.logout = logout;
@@ -3053,6 +3229,8 @@ window.calcRapidaSyncBRL = calcRapidaSyncBRL;
 window.calcRapidaSyncUSD = calcRapidaSyncUSD;
 window.limparCalc = limparCalc;
 window.abrirModalLote = abrirModalLote;
+window.abrirDetalhes = abrirDetalhes;
+window.fecharDetalhes = fecharDetalhes;
 window.toggleCampoCompra = toggleCampoCompra;
 window.fecharModalLote = fecharModalLote;
 window.salvarLote = salvarLote;
