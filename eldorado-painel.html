@@ -1344,13 +1344,15 @@ window.loginMode = loginMode;
 
 // ===== AUTH =====
 function mostrarLogin() {
+  window._entrando = false;
+  window._cotacaoInterval = null;
   const ls = document.getElementById('login-screen');
-  if (ls) ls.style.cssText = 'display: flex !important;';
+  if (ls) ls.style.cssText = '';
 }
 
 function esconderLogin() {
   const ls = document.getElementById('login-screen');
-  if (ls) ls.style.cssText = 'display: none !important;';
+  if (ls) ls.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
 }
 
 function setUserUI(user) {
@@ -1402,19 +1404,37 @@ function showLoginError(msg) {
 
 async function entrarNoPainel(user) {
   if (!user) return;
-  // Esconder tela de login com força máxima
+  if (window._entrando) return; // evitar chamada dupla
+  window._entrando = true;
+
+  // 1. Esconder login IMEDIATAMENTE antes de qualquer await
   const ls = document.getElementById('login-screen');
-  if (ls) { ls.style.cssText = 'display: none !important;'; }
-  // Configurar usuário
+  if (ls) ls.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+
+  // 2. Configurar usuário
   setUserUI(user);
-  // Carregar dados
-  mostrarLoading(true);
-  await fetchCotacao();
-  await carregarProdutos();
-  mostrarLoading(false);
-  if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
-  // Limpar hash da URL
+
+  // 3. Limpar hash da URL
   if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+
+  // 4. Carregar dados (erros não afetam a tela de login)
+  try {
+    mostrarLoading(true);
+    await fetchCotacao();
+    await carregarProdutos();
+    mostrarLoading(false);
+  } catch(e) {
+    mostrarLoading(false);
+    console.error('Erro ao carregar:', e);
+    showToast('Erro ao carregar dados: ' + e.message, 'error');
+  }
+
+  if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
+  
+  // Garantir que login continua escondido mesmo após os awaits
+  if (ls) ls.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+  
+  window._entrando = false;
 }
 
 function dbg(msg) {
