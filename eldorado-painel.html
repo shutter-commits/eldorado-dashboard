@@ -1411,17 +1411,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('btn-entrar').click();
   });
 
-  // Escutar mudanças de auth
+  // Escutar mudanças de auth (login/logout/redirect OAuth)
   supabase.auth.onAuthStateChange(async (event, session) => {
-    if (session?.user) {
+    if (event === 'SIGNED_IN' && session?.user) {
       setUserUI(session.user);
       esconderLogin();
-      mostrarLoading(true);
-      await fetchCotacao();
-      await carregarProdutos();
-      mostrarLoading(false);
-      setInterval(fetchCotacao, 60000);
-    } else {
+      if (!currentUser || currentUser.id !== session.user.id) {
+        mostrarLoading(true);
+        await fetchCotacao();
+        await carregarProdutos();
+        mostrarLoading(false);
+        setInterval(fetchCotacao, 60000);
+      }
+    } else if (event === 'SIGNED_OUT') {
       mostrarLogin();
     }
   });
@@ -1437,7 +1439,21 @@ async function init() {
   if (savedEmail) document.getElementById('api-email').value = savedEmail;
   const savedToken = localStorage.getItem('eldorado_jwt');
   if (savedToken) setAuthStatus(true, savedToken);
-  // Auth é gerenciada pelo onAuthStateChange
+
+  // Mostrar login imediatamente — onAuthStateChange esconde se já logado
+  mostrarLogin();
+
+  // Verificar sessão ativa
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    setUserUI(session.user);
+    esconderLogin();
+    mostrarLoading(true);
+    await fetchCotacao();
+    await carregarProdutos();
+    mostrarLoading(false);
+    setInterval(fetchCotacao, 60000);
+  }
 }
 
 function mostrarLoading(show) {
