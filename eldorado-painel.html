@@ -1362,14 +1362,30 @@ function showLoginError(msg) {
   el.style.display = 'block';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Inicializar Supabase após DOM pronto (garante que window.supabase existe)
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Inicializar Supabase
   supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
+  // 2. Rodar init (configura campos, datas, taxa)
+  await init();
+
+  // 3. Verificar sessão já existente
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    setUserUI(session.user);
+    esconderLogin();
+    mostrarLoading(true);
+    await fetchCotacao();
+    await carregarProdutos();
+    mostrarLoading(false);
+    setInterval(fetchCotacao, 60000);
+  }
+
+  // 4. Botão Google
   document.getElementById('btn-google').addEventListener('click', async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href }
+      options: { redirectTo: 'https://eldorado-dashboard-eight.vercel.app/eldorado-painel.html' }
     });
     if (error) showLoginError('Erro ao abrir login Google: ' + error.message);
   });
@@ -1414,17 +1430,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Escutar mudanças de auth (login/logout/redirect OAuth)
   supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
       setUserUI(session.user);
       esconderLogin();
-      if (!currentUser || currentUser.id !== session.user.id) {
-        mostrarLoading(true);
-        await fetchCotacao();
-        await carregarProdutos();
-        mostrarLoading(false);
-        setInterval(fetchCotacao, 60000);
-      }
     } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      produtos = [];
+      renderAll();
       mostrarLogin();
     }
   });
@@ -1432,29 +1444,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== INIT =====
 async function init() {
+  // Configurar campos básicos
   document.getElementById('f-data').value = hoje();
   document.getElementById('sell-data').value = hoje();
   document.getElementById('taxa-input').value = taxa;
   document.getElementById('taxa-atual').innerHTML = `Taxa atual: <strong>${taxa}%</strong>`;
   const savedEmail = localStorage.getItem('eldorado_email');
   if (savedEmail) document.getElementById('api-email').value = savedEmail;
-  const savedToken = localStorage.getItem('eldorado_jwt');
-  if (savedToken) setAuthStatus(true, savedToken);
-
-  // Mostrar login imediatamente — onAuthStateChange esconde se já logado
-  mostrarLogin();
-
-  // Verificar sessão ativa
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) {
-    setUserUI(session.user);
-    esconderLogin();
-    mostrarLoading(true);
-    await fetchCotacao();
-    await carregarProdutos();
-    mostrarLoading(false);
-    setInterval(fetchCotacao, 60000);
-  }
 }
 
 function mostrarLoading(show) {
@@ -2177,9 +2173,6 @@ window.calcRapidaSyncUSD = calcRapidaSyncUSD;
 window.limparCalc = limparCalc;
 window.confirmarDelete = confirmarDelete;
 window.cancelarDelete = cancelarDelete;
-
-// Inicializar após DOM pronto
-document.addEventListener('DOMContentLoaded', init);
 </script>
 <!-- ===== TELA DE LOGIN ===== -->
 <div id="login-screen">
