@@ -607,7 +607,7 @@
     justify-content: center;
     background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,200,66,0.08) 0%, transparent 70%);
   }
-  #login-screen.hidden { display: none; }
+  #login-screen.hidden { display: none !important; }
 
   .login-box {
     background: var(--surface);
@@ -1345,12 +1345,12 @@ window.loginMode = loginMode;
 // ===== AUTH =====
 function mostrarLogin() {
   const ls = document.getElementById('login-screen');
-  if (ls) { ls.classList.remove('hidden'); ls.style.display = 'flex'; }
+  if (ls) ls.style.cssText = 'display: flex !important;';
 }
 
 function esconderLogin() {
   const ls = document.getElementById('login-screen');
-  if (ls) { ls.classList.add('hidden'); ls.style.display = 'none'; }
+  if (ls) ls.style.cssText = 'display: none !important;';
 }
 
 function setUserUI(user) {
@@ -1402,19 +1402,18 @@ function showLoginError(msg) {
 
 async function entrarNoPainel(user) {
   if (!user) return;
-  setUserUI(user);
-  // Forçar esconder login com múltiplas abordagens
+  // Esconder tela de login com força máxima
   const ls = document.getElementById('login-screen');
-  if (ls) {
-    ls.classList.add('hidden');
-    ls.style.display = 'none';
-  }
+  if (ls) { ls.style.cssText = 'display: none !important;'; }
+  // Configurar usuário
+  setUserUI(user);
+  // Carregar dados
   mostrarLoading(true);
   await fetchCotacao();
   await carregarProdutos();
   mostrarLoading(false);
   if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
-  // Limpar hash da URL sem recarregar
+  // Limpar hash da URL
   if (window.location.hash) history.replaceState(null, '', window.location.pathname);
 }
 
