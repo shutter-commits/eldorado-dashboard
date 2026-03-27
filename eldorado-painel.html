@@ -856,6 +856,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('ativos', this)">📦 Ativos</button>
     <button class="tab" onclick="switchTab('vendidos', this)">✅ Vendidos</button>
+    <button class="tab" onclick="switchTab('lotes', this)">🗃️ Lotes</button>
     <button class="tab" onclick="switchTab('calc', this)">🧮 Calculadora</button>
     <button class="tab" onclick="switchTab('config', this)">⚙️ Configurações</button>
   </div>
@@ -916,6 +917,20 @@
           <tr><td colspan="11"><div class="empty-state"><div class="icon">✅</div><p>Nenhuma venda concluída ainda.</p></div></td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: LOTES -->
+  <div class="section" id="sec-lotes">
+    <div class="table-header">
+      <h2>Meus Lotes</h2>
+      <button class="btn btn-gold" onclick="abrirModalLote()">+ Novo Lote</button>
+    </div>
+    <div id="lotes-container">
+      <div class="empty-state" style="padding:60px 20px;text-align:center;color:var(--text2);">
+        <div style="font-size:40px;margin-bottom:12px;">🗃️</div>
+        <p style="font-size:14px;">Nenhum lote cadastrado ainda.</p>
+      </div>
     </div>
   </div>
 
@@ -1067,7 +1082,7 @@
     <div class="config-card">
       <h3>🔑 Integração com Eldorado.gg</h3>
       <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
-      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong>api@eldorado.gg</strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5233223b12373e363d2033363d7c3535">[email&#160;protected]</a></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
 
       <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
         ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
@@ -1116,6 +1131,34 @@
   </div>
 </main>
 
+<!-- MODAL: NOVO LOTE -->
+<div class="modal-overlay" id="modal-lote-overlay" onclick="if(event.target.id==='modal-lote-overlay')fecharModalLote()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-lote-title">🗃️ Novo Lote</h3>
+      <button class="modal-close" onclick="fecharModalLote()">✕</button>
+    </div>
+    <div class="form-grid full">
+      <div class="form-group">
+        <label>Nome do Lote</label>
+        <input type="text" id="fl-nome" placeholder="Ex: Pacote Skins CS2...">
+      </div>
+      <div class="form-group">
+        <label>Custo Total Pago (R$)</label>
+        <input type="number" id="fl-custo" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Observações (opcional)</label>
+        <input type="text" id="fl-obs" placeholder="Detalhes do lote...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="fecharModalLote()">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarLote()">Criar Lote</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: NOVO PRODUTO -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
   <div class="modal">
@@ -1154,7 +1197,13 @@
         <label>Preço de Venda (R$) <span style="color:var(--muted);font-size:9px;">← converte p/ USD</span></label>
         <input type="number" id="f-venda-brl" placeholder="0.00" step="0.01" oninput="syncUSD()">
       </div>
-      <div class="form-group span2">
+      <div class="form-group">
+        <label>Lote (opcional)</label>
+        <select id="f-lote">
+          <option value="">— Produto individual —</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Observações (opcional)</label>
         <input type="text" id="f-obs" placeholder="Detalhes adicionais...">
       </div>
@@ -1305,7 +1354,7 @@
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===== SUPABASE AUTH + CONFIG =====
 const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
@@ -1334,6 +1383,7 @@ async function supaFetch(method, path, body = null) {
 
 // ===== STATE =====
 let produtos = [];
+let lotes = [];
 let taxa = parseFloat(localStorage.getItem('eldorado_taxa') || '15');
 let cotacaoUSD = 0;
 let sellIndex = null;
@@ -1424,6 +1474,7 @@ async function entrarNoPainel(user) {
   try {
     mostrarLoading(true);
     await fetchCotacao();
+    await carregarLotes();
     await carregarProdutos();
     mostrarLoading(false);
   } catch(e) {
@@ -1549,6 +1600,7 @@ async function carregarProdutos() {
     const data = await supaFetch('GET', `/rest/v1/produtos?select=*&order=criado_em.desc${filter}`);
     produtos = (data || []).map(p => ({
       id: p.id,
+      loteId: p.lote_id,
       nome: p.nome,
       categoria: p.categoria,
       dataPostagem: p.data_postagem,
@@ -1666,6 +1718,7 @@ function openModal(idx = null) {
     document.getElementById('f-venda-usd').value = '';
     document.getElementById('f-venda-brl').value = '';
     document.getElementById('f-obs').value = '';
+    document.getElementById('f-lote').value = '';
   }
   calcPreview();
   document.getElementById('modal-overlay').classList.add('open');
@@ -1730,6 +1783,7 @@ async function salvarProduto() {
     nome, categoria, obs,
     data_postagem: dataPostagem,
     compra, venda_usd: vendaUSD,
+    lote_id: document.getElementById('f-lote').value || null,
     taxa_usd: t.taxaEldorado,
     receber_usd: t.creditoPayoneer,
     receber_brl: t.liquidoBRL,
@@ -1872,6 +1926,7 @@ function renderAll() {
   renderAtivos();
   renderVendidos();
   renderSummary();
+  renderLotes();
 }
 
 function catIcon(cat) {
@@ -1899,7 +1954,11 @@ function renderAtivos() {
     const lucroPfx = p.lucroEst >= 0 ? '+' : '';
     const diasPostado = Math.round((hoje - new Date(p.dataPostagem)) / (1000*60*60*24));
     return `<tr>
-      <td><strong>${p.nome}</strong>${p.obs ? `<br><span style="color:var(--text2);font-size:11px;">${p.obs}</span>` : ''}</td>
+      <td>
+        <strong>${p.nome}</strong>
+        ${p.loteId ? `<br><span style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;color:var(--gold);font-family:var(--mono);">📦 ${lotes.find(l=>l.id===p.loteId)?.nome||'Lote'}</span>` : ''}
+        ${p.obs ? `<br><span style="color:var(--text2);font-size:11px;">${p.obs}</span>` : ''}
+      </td>
       <td>${catIcon(p.categoria)} ${p.categoria}</td>
       <td class="mono">R$ ${p.compra.toFixed(2)}</td>
       <td class="mono">$ ${p.vendaUSD.toFixed(2)}</td>
@@ -2220,6 +2279,145 @@ function limparCalc() {
   document.getElementById('calc-resultado').style.display = 'none';
 }
 
+// ===== LOTES =====
+async function carregarLotes() {
+  try {
+    const uid = currentUser?.id;
+    const filter = uid ? `&user_id=eq.${uid}` : '';
+    const data = await supaFetch('GET', `/rest/v1/lotes?select=*&order=criado_em.desc${filter}`);
+    lotes = data || [];
+    atualizarDropdownLotes();
+    renderLotes();
+  } catch(e) {
+    console.error('Erro ao carregar lotes:', e.message);
+  }
+}
+
+function atualizarDropdownLotes() {
+  const sel = document.getElementById('f-lote');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Produto individual —</option>';
+  lotes.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.id;
+    opt.textContent = `📦 ${l.nome} (R$ ${parseFloat(l.custo_total).toFixed(2)})`;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function renderLotes() {
+  const container = document.getElementById('lotes-container');
+  if (!container) return;
+  if (lotes.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="padding:60px 20px;text-align:center;color:var(--text2);"><div style="font-size:40px;margin-bottom:12px;">🗃️</div><p style="font-size:14px;">Nenhum lote cadastrado ainda.</p></div>`;
+    return;
+  }
+  container.innerHTML = lotes.map(l => {
+    const prods = produtos.filter(p => p.loteId === l.id);
+    const vendidos = prods.filter(p => p.status === 'vendido');
+    const ativos = prods.filter(p => p.status === 'ativo');
+    const custoTotal = parseFloat(l.custo_total) || 0;
+    const recebidoTotal = vendidos.reduce((a, p) => a + (p.liquidoBRL || p.brlRecebido || 0), 0);
+    const estimadoAtivos = ativos.reduce((a, p) => a + (p.liquidoBRL || 0), 0);
+    const totalEsperado = recebidoTotal + estimadoAtivos;
+    const lucroParc = recebidoTotal - custoTotal;
+    const lucroEst = totalEsperado - custoTotal;
+    const roiParc = custoTotal > 0 ? (lucroParc / custoTotal * 100) : 0;
+    const pctVendido = prods.length > 0 ? (vendidos.length / prods.length * 100) : 0;
+    const lucroClass = lucroParc >= 0 ? 'var(--green)' : 'var(--red)';
+
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;">🗃️ ${l.nome}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${l.obs || ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--text2);font-family:var(--mono);">${prods.length} produto(s)</span>
+          <button class="action-btn del" title="Excluir lote" onclick="excluirLote('${l.id}')">🗑</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;">Investido</div>
+          <div style="font-family:var(--mono);font-weight:700;color:var(--gold);">R$ ${custoTotal.toFixed(2)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;">Recebido</div>
+          <div style="font-family:var(--mono);font-weight:700;color:var(--blue);">R$ ${recebidoTotal.toFixed(2)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;">Lucro parcial</div>
+          <div style="font-family:var(--mono);font-weight:700;color:${lucroClass};">${lucroParc >= 0 ? '+' : ''}R$ ${lucroParc.toFixed(2)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;">ROI parcial</div>
+          <div style="font-family:var(--mono);font-weight:700;color:${lucroClass};">${roiParc >= 0 ? '+' : ''}${roiParc.toFixed(1)}%</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;">
+          <span>${vendidos.length} vendido(s) de ${prods.length}</span>
+          <span>${pctVendido.toFixed(0)}%</span>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${pctVendido}%;background:var(--green);border-radius:3px;transition:width 0.3s;"></div>
+        </div>
+      </div>
+
+      ${prods.length > 0 ? `<div style="margin-top:12px;font-size:11px;color:var(--text2);">
+        ${prods.map(p => `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;margin:2px;font-family:var(--mono);">
+          ${p.status === 'vendido' ? '✅' : '⏳'} ${p.nome} — $${(p.vendaUSD||0).toFixed(2)}
+        </span>`).join('')}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function abrirModalLote(id = null) {
+  document.getElementById('fl-nome').value = '';
+  document.getElementById('fl-custo').value = '';
+  document.getElementById('fl-obs').value = '';
+  document.getElementById('modal-lote-overlay').classList.add('open');
+}
+
+function fecharModalLote() {
+  document.getElementById('modal-lote-overlay').classList.remove('open');
+}
+
+async function salvarLote() {
+  const nome = document.getElementById('fl-nome').value.trim();
+  const custo = parseFloat(document.getElementById('fl-custo').value);
+  const obs = document.getElementById('fl-obs').value.trim();
+  if (!nome || isNaN(custo)) { showToast('Preencha nome e custo do lote!', 'error'); return; }
+  try {
+    await supaFetch('POST', '/rest/v1/lotes', {
+      nome, custo_total: custo, obs, user_id: currentUser?.id
+    });
+    fecharModalLote();
+    await carregarLotes();
+    showToast('Lote criado!', 'success');
+  } catch(e) {
+    showToast('Erro ao criar lote: ' + e.message, 'error');
+  }
+}
+
+async function excluirLote(id) {
+  if (!confirm('Excluir este lote? Os produtos vinculados viram individuais.')) return;
+  try {
+    await supaFetch('DELETE', `/rest/v1/lotes?id=eq.${id}`);
+    await carregarLotes();
+    await carregarProdutos();
+    showToast('Lote removido.', 'info');
+  } catch(e) {
+    showToast('Erro ao remover lote: ' + e.message, 'error');
+  }
+}
+
 // ===== EXPOR FUNÇÕES AO ESCOPO GLOBAL (fix iframe) =====
 window.openModal = openModal;
 window.logout = logout;
@@ -2246,6 +2444,10 @@ window.calcRapida = calcRapida;
 window.calcRapidaSyncBRL = calcRapidaSyncBRL;
 window.calcRapidaSyncUSD = calcRapidaSyncUSD;
 window.limparCalc = limparCalc;
+window.abrirModalLote = abrirModalLote;
+window.fecharModalLote = fecharModalLote;
+window.salvarLote = salvarLote;
+window.excluirLote = excluirLote;
 window.confirmarDelete = confirmarDelete;
 window.cancelarDelete = cancelarDelete;
 window.mostrarLogin = mostrarLogin;
@@ -2258,7 +2460,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(reg => reg.unregister());
   }).then(() => {
-    navigator.serviceWorker.register('./service-worker.js')
+    navigator.servic
       .then(reg => {
         reg.update();
         console.log('SW registrado e atualizado');
