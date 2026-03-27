@@ -1280,7 +1280,7 @@
       <p>Entre na sua conta para continuar</p>
     </div>
 
-    <button class="btn-google" id="btn-google">
+    <button class="btn-google" id="btn-google" onclick="window.loginGoogle()">
       <svg width="18" height="18" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -1295,8 +1295,8 @@
     <div class="login-form">
       <div id="login-error" class="login-error"></div>
       <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
-      <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password">
-      <button class="btn-login" id="btn-entrar">Entrar</button>
+      <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter') window.loginEmail()">
+      <button class="btn-login" id="btn-entrar" onclick="window.loginEmail()">Entrar</button>
     </div>
 
     <div class="login-toggle" id="login-toggle-text">
@@ -1398,14 +1398,14 @@ function showLoginError(msg) {
   el.style.display = 'block';
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Inicializar Supabase
+async function setupAuth() {
+  // Inicializar Supabase
   sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-  // 2. Rodar init (configura campos, datas, taxa)
+  // Configurar campos
   await init();
 
-  // 3. Verificar sessão já existente
+  // Verificar sessão já existente
   const { data: { session } } = await sbClient.auth.getSession();
   if (session?.user) {
     setUserUI(session.user);
@@ -1414,57 +1414,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchCotacao();
     await carregarProdutos();
     mostrarLoading(false);
-    setInterval(fetchCotacao, 60000);
+    if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
   }
 
-  // 4. Botão Google
-  document.getElementById('btn-google').addEventListener('click', async () => {
-    const { error } = await sbClient.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'https://eldorado-dashboard-eight.vercel.app/eldorado-painel.html' }
-    });
-    if (error) showLoginError('Erro ao abrir login Google: ' + error.message);
-  });
-
-  document.getElementById('btn-entrar').addEventListener('click', async () => {
-    const email = document.getElementById('login-email').value.trim();
-    const senha = document.getElementById('login-senha').value;
-    if (!email || !senha) { showLoginError('Preencha e-mail e senha.'); return; }
-    const btn = document.getElementById('btn-entrar');
-    btn.disabled = true;
-    btn.textContent = 'Aguarde...';
-    document.getElementById('login-error').style.display = 'none';
-
-    let error;
-    if (loginMode === 'entrar') {
-      ({ error } = await sbClient.auth.signInWithPassword({ email, password: senha }));
-    } else {
-      ({ error } = await sbClient.auth.signUp({ email, password: senha }));
-      if (!error) {
-        showLoginError('Conta criada! Verifique seu e-mail para confirmar.');
-        btn.disabled = false;
-        btn.textContent = 'Criar conta';
-        return;
-      }
-    }
-
-    if (error) {
-      const msgs = {
-        'Invalid login credentials': 'E-mail ou senha incorretos.',
-        'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
-        'User already registered': 'E-mail já cadastrado. Faça login.',
-      };
-      showLoginError(msgs[error.message] || error.message);
-      btn.disabled = false;
-      btn.textContent = loginMode === 'entrar' ? 'Entrar' : 'Criar conta';
-    }
-  });
-
-  document.getElementById('login-senha').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('btn-entrar').click();
-  });
-
-  // Escutar mudanças de auth (login/logout/redirect OAuth)
+  // Escutar mudanças de auth
   sbClient.auth.onAuthStateChange(async (event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
       const isNewUser = !currentUser || currentUser.id !== session.user.id;
@@ -1484,7 +1437,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       mostrarLogin();
     }
   });
-});
+}
+
+// Funções globais de login — chamadas direto pelo onclick dos botões
+window.loginGoogle = async function() {
+  if (!sbClient) { showLoginError('Sistema não inicializado. Recarregue a página.'); return; }
+  const { error } = await sbClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: 'https://eldorado-dashboard-eight.vercel.app/eldorado-painel.html' }
+  });
+  if (error) showLoginError('Erro Google: ' + error.message);
+};
+
+window.loginEmail = async function() {
+  if (!sbClient) { showLoginError('Sistema não inicializado. Recarregue a página.'); return; }
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  if (!email || !senha) { showLoginError('Preencha e-mail e senha.'); return; }
+  const btn = document.getElementById('btn-entrar');
+  btn.disabled = true;
+  btn.textContent = 'Aguarde...';
+  document.getElementById('login-error').style.display = 'none';
+
+  let result;
+  if (loginMode === 'entrar') {
+    result = await sbClient.auth.signInWithPassword({ email, password: senha });
+  } else {
+    result = await sbClient.auth.signUp({ email, password: senha });
+    if (!result.error) {
+      showLoginError('Conta criada! Verifique seu e-mail para confirmar.');
+      btn.disabled = false;
+      btn.textContent = 'Criar conta';
+      return;
+    }
+  }
+
+  if (result.error) {
+    const msgs = {
+      'Invalid login credentials': 'E-mail ou senha incorretos.',
+      'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
+      'User already registered': 'E-mail já cadastrado. Faça login.',
+    };
+    showLoginError(msgs[result.error.message] || result.error.message);
+    btn.disabled = false;
+    btn.textContent = loginMode === 'entrar' ? 'Entrar' : 'Criar conta';
+  }
+};
+
+document.addEventListener('DOMContentLoaded', setupAuth);
 
 // ===== INIT =====
 async function init() {
@@ -2216,7 +2216,7 @@ window.esconderLogin = esconderLogin;
       <p>Entre na sua conta para continuar</p>
     </div>
 
-    <button class="btn-google" id="btn-google">
+    <button class="btn-google" id="btn-google" onclick="window.loginGoogle()">
       <svg width="18" height="18" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -2231,8 +2231,8 @@ window.esconderLogin = esconderLogin;
     <div class="login-form">
       <div id="login-error" class="login-error"></div>
       <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
-      <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password">
-      <button class="btn-login" id="btn-entrar">Entrar</button>
+      <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter') window.loginEmail()">
+      <button class="btn-login" id="btn-entrar" onclick="window.loginEmail()">Entrar</button>
     </div>
 
     <div class="login-toggle" id="login-toggle-text">
