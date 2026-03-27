@@ -1398,6 +1398,16 @@ function showLoginError(msg) {
   el.style.display = 'block';
 }
 
+async function entrarNoPainel(user) {
+  setUserUI(user);
+  esconderLogin();
+  mostrarLoading(true);
+  await fetchCotacao();
+  await carregarProdutos();
+  mostrarLoading(false);
+  if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
+}
+
 async function setupAuth() {
   // Inicializar Supabase
   sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1405,31 +1415,16 @@ async function setupAuth() {
   // Configurar campos
   await init();
 
-  // Verificar sessão já existente
+  // Verificar sessão já existente (usuário já logado)
   const { data: { session } } = await sbClient.auth.getSession();
   if (session?.user) {
-    setUserUI(session.user);
-    esconderLogin();
-    mostrarLoading(true);
-    await fetchCotacao();
-    await carregarProdutos();
-    mostrarLoading(false);
-    if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
+    await entrarNoPainel(session.user);
   }
 
-  // Escutar mudanças de auth
+  // Escutar mudanças de auth (principalmente para redirect do Google OAuth)
   sbClient.auth.onAuthStateChange(async (event, session) => {
-    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
-      const isNewUser = !currentUser || currentUser.id !== session.user.id;
-      setUserUI(session.user);
-      esconderLogin();
-      if (isNewUser) {
-        mostrarLoading(true);
-        await fetchCotacao();
-        await carregarProdutos();
-        mostrarLoading(false);
-        if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
-      }
+    if (event === 'SIGNED_IN' && session?.user) {
+      await entrarNoPainel(session.user);
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       produtos = [];
@@ -1481,6 +1476,9 @@ window.loginEmail = async function() {
     showLoginError(msgs[result.error.message] || result.error.message);
     btn.disabled = false;
     btn.textContent = loginMode === 'entrar' ? 'Entrar' : 'Criar conta';
+  } else if (result.data?.user) {
+    // Login por e-mail bem sucedido — entrar no painel direto
+    await entrarNoPainel(result.data.user);
   }
 };
 
