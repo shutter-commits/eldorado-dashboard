@@ -1171,7 +1171,7 @@
     <div class="config-card">
       <h3>🔑 Integração com Eldorado.gg</h3>
       <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
-      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5233223b12373e363d2033363d7c3535">[email&#160;protected]</a></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong>api@eldorado.gg</strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
 
       <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
         ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
@@ -1443,7 +1443,7 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ===== SUPABASE AUTH + CONFIG =====
 const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
@@ -2688,8 +2688,7 @@ function exportarCSV() {
     ].join(',');
   });
 
-  const csv = [cabecalho.join(','), ...linhas].join('
-');
+  const csv = [cabecalho.join(','), ...linhas].join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
