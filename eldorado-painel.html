@@ -1344,10 +1344,16 @@ window.loginMode = loginMode;
 
 // ===== AUTH =====
 function mostrarLogin() {
+  // Resetar flags
   window._entrando = false;
-  window._cotacaoInterval = null;
+  if (window._cotacaoInterval) { clearInterval(window._cotacaoInterval); window._cotacaoInterval = null; }
+  // Resetar estado
+  currentUser = null;
+  produtos = [];
+  // Mostrar tela de login forçado
   const ls = document.getElementById('login-screen');
-  if (ls) ls.style.cssText = '';
+  if (ls) ls.style.cssText = 'display:flex!important;';
+  renderAll();
 }
 
 function esconderLogin() {
@@ -1376,12 +1382,9 @@ document.addEventListener('click', (e) => {
 
 async function logout() {
   if (!sbClient) return;
-  await sbClient.auth.signOut();
-  currentUser = null;
-  produtos = [];
-  renderAll();
-  mostrarLogin();
   document.getElementById('user-menu').classList.remove('open');
+  await sbClient.auth.signOut();
+  // onAuthStateChange(SIGNED_OUT) vai chamar mostrarLogin automaticamente
   showToast('Sessão encerrada.', 'info');
 }
 
