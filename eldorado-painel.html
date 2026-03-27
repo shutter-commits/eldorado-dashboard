@@ -1344,11 +1344,13 @@ window.loginMode = loginMode;
 
 // ===== AUTH =====
 function mostrarLogin() {
-  document.getElementById('login-screen').classList.remove('hidden');
+  const ls = document.getElementById('login-screen');
+  if (ls) { ls.classList.remove('hidden'); ls.style.display = 'flex'; }
 }
 
 function esconderLogin() {
-  document.getElementById('login-screen').classList.add('hidden');
+  const ls = document.getElementById('login-screen');
+  if (ls) { ls.classList.add('hidden'); ls.style.display = 'none'; }
 }
 
 function setUserUI(user) {
@@ -1399,13 +1401,21 @@ function showLoginError(msg) {
 }
 
 async function entrarNoPainel(user) {
+  if (!user) return;
   setUserUI(user);
-  esconderLogin();
+  // Forçar esconder login com múltiplas abordagens
+  const ls = document.getElementById('login-screen');
+  if (ls) {
+    ls.classList.add('hidden');
+    ls.style.display = 'none';
+  }
   mostrarLoading(true);
   await fetchCotacao();
   await carregarProdutos();
   mostrarLoading(false);
   if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
+  // Limpar hash da URL sem recarregar
+  if (window.location.hash) history.replaceState(null, '', window.location.pathname);
 }
 
 async function setupAuth() {
@@ -1421,9 +1431,11 @@ async function setupAuth() {
     await entrarNoPainel(session.user);
   }
 
-  // Escutar mudanças de auth (principalmente para redirect do Google OAuth)
+  // Escutar mudanças de auth
   sbClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
+    // SIGNED_IN: login normal ou retorno do OAuth Google
+    // INITIAL_SESSION: sessão restaurada ao carregar a página
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
       await entrarNoPainel(session.user);
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
