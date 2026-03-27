@@ -1341,20 +1341,10 @@ async function logout() {
 // ===== LOGIN FORM =====
 function setLoginMode(mode) {
   loginMode = mode;
-  const btn = document.getElementById('btn-entrar');
-  const toggle = document.getElementById('login-toggle-btn');
-  const toggleText = document.getElementById('login-toggle-text');
-  const senhaEl = document.getElementById('login-senha');
-  if (mode === 'entrar') {
-    btn.textContent = 'Entrar';
-    toggle.textContent = 'Cadastrar';
-    toggleText.innerHTML = 'Não tem conta? <span id="login-toggle-btn" onclick="setLoginMode('cadastrar')">Cadastrar</span>';
-    senhaEl.placeholder = 'Senha';
-  } else {
-    btn.textContent = 'Criar conta';
-    toggleText.innerHTML = 'Já tem conta? <span id="login-toggle-btn" onclick="setLoginMode('entrar')">Entrar</span>';
-    senhaEl.placeholder = 'Crie uma senha (mín. 6 caracteres)';
-  }
+  document.getElementById('btn-entrar').textContent = mode === 'entrar' ? 'Entrar' : 'Criar conta';
+  document.getElementById('login-senha').placeholder = mode === 'entrar' ? 'Senha' : 'Crie uma senha (mín. 6 caracteres)';
+  document.getElementById('login-toggle-label').textContent = mode === 'entrar' ? 'Não tem conta? ' : 'Já tem conta? ';
+  document.getElementById('login-toggle-btn').textContent = mode === 'entrar' ? 'Cadastrar' : 'Entrar';
   document.getElementById('login-error').style.display = 'none';
 }
 
@@ -2209,7 +2199,7 @@ document.addEventListener('DOMContentLoaded', init);
     </div>
 
     <div class="login-toggle" id="login-toggle-text">
-      Não tem conta? <span id="login-toggle-btn">Cadastrar</span>
+      <span id="login-toggle-label">Não tem conta? </span><span id="login-toggle-btn" onclick="setLoginMode(loginMode === 'entrar' ? 'cadastrar' : 'entrar')">Cadastrar</span>
     </div>
   </div>
 </div>
