@@ -589,12 +589,133 @@
 
   .sell-info-box strong { color: var(--text); }
 
+  /* ===== RESPONSIVIDADE ===== */
+
+  /* Tela grande / Desktop wide (1400px+) */
+  @media (min-width: 1400px) {
+    main { padding: 40px; }
+    .summary-grid { gap: 20px; }
+    .card-value { font-size: 28px; }
+    .tabs { width: fit-content; }
+  }
+
+  /* Notebook padrão (1024px - 1400px) */
+  @media (max-width: 1400px) and (min-width: 1024px) {
+    main { padding: 28px; }
+    .summary-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  }
+
+  /* Tablet landscape / Notebook pequeno (900px - 1024px) */
+  @media (max-width: 1024px) and (min-width: 900px) {
+    main { padding: 20px; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .card-value { font-size: 22px; }
+    .tabs { flex-wrap: wrap; }
+    .tab { font-size: 12px; padding: 7px 14px; }
+  }
+
+  /* Tablet portrait (900px) */
   @media (max-width: 900px) {
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
     main { padding: 16px; }
     header { padding: 14px 16px; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
     .form-grid { grid-template-columns: 1fr; }
     .form-group.span2 { grid-column: span 1; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 700px; }
+  }
+
+  /* Mobile (600px) */
+  @media (max-width: 600px) {
+    /* Header */
+    header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    .logo h1 { font-size: 14px; }
+    .cotacao-badge { font-size: 10px; padding: 6px 10px; gap: 8px; }
+    .cotacao-badge span { font-size: 10px; }
+    #cotacao-hl { display: none; }
+    .btn-gold { padding: 7px 12px; font-size: 12px; }
+
+    /* Main */
+    main { padding: 12px; }
+
+    /* Summary cards — 1 coluna */
+    .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .card-value { font-size: 20px; }
+
+    /* Tabs — scroll horizontal */
+    .tabs {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      display: flex;
+      width: 100%;
+      border-radius: 10px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex-shrink: 0; padding: 8px 14px; font-size: 12px; }
+
+    /* Tabelas — scroll horizontal */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
+    table { min-width: 600px; }
+    thead th { font-size: 10px; padding: 10px 10px; }
+    tbody td { font-size: 12px; padding: 10px 10px; }
+
+    /* Filtros — coluna única */
+    #sec-ativos > div:nth-child(2),
+    #sec-vendidos > div:nth-child(3) {
+      flex-direction: column;
+    }
+    #sec-ativos input, #sec-ativos select,
+    #sec-vendidos input, #sec-vendidos select {
+      width: 100% !important;
+      min-width: unset !important;
+    }
+
+    /* Modal — tela cheia no mobile */
+    .modal {
+      max-width: 100%;
+      margin: 0;
+      border-radius: 16px 16px 0 0;
+      max-height: 92vh;
+    }
+    .modal-overlay {
+      align-items: flex-end;
+    }
+
+    /* Gráficos — coluna única */
+    #sec-graficos > div {
+      grid-template-columns: 1fr !important;
+    }
+    #sec-graficos > div > div {
+      grid-column: span 1 !important;
+    }
+
+    /* Lotes — cards responsivos */
+    #lotes-container > div > div:nth-child(2) {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Calculadora — coluna única */
+    #sec-calc > div > div > div {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Botões de ação menores */
+    .action-btn { width: 26px; height: 26px; font-size: 12px; }
+
+    /* Table header */
+    .table-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .table-header h2 { font-size: 15px; }
+  }
+
+  /* Mobile pequeno (400px) */
+  @media (max-width: 400px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .card-value { font-size: 17px; }
+    .card-label { font-size: 9px; }
+    .logo h1 { display: none; }
   }
 
   /* ===== LOGIN ===== */
