@@ -2782,15 +2782,11 @@ window.esconderLogin = esconderLogin;
 
 <script>
 if ('serviceWorker' in navigator) {
-  // Desregistrar SWs antigos primeiro, depois registrar novo
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(reg => reg.unregister());
   }).then(() => {
-    navigator.servic
-      .then(reg => {
-        reg.update();
-        console.log('SW registrado e atualizado');
-      })
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => { reg.update(); console.log('SW registrado'); })
       .catch(e => console.warn('SW falhou:', e));
   });
 }
