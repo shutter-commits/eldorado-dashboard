@@ -1417,32 +1417,39 @@ async function entrarNoPainel(user) {
   if (window.location.hash) history.replaceState(null, '', window.location.pathname);
 }
 
-async function setupAuth() {
-  // Inicializar Supabase
-  sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+function dbg(msg) {
+  console.log('[AUTH]', msg);
+  let d = document.getElementById('_dbg');
+  if (!d) {
+    d = document.createElement('div');
+    d.id = '_dbg';
+    d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#000;color:#f5c842;font-size:12px;font-family:monospace;padding:6px 12px;z-index:99999;border-top:1px solid #333;';
+    document.body.appendChild(d);
+  }
+  d.textContent = '[AUTH] ' + msg;
+}
 
-  // Configurar campos
+async function setupAuth() {
+  dbg('setupAuth iniciado');
+  sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
   await init();
 
-  // Verificar sessão já existente (usuário já logado)
-  const { data: { session } } = await sbClient.auth.getSession();
-  if (session?.user) {
-    await entrarNoPainel(session.user);
-  }
-
-  // Escutar mudanças de auth
+  // IMPORTANTE: registrar onAuthStateChange ANTES de getSession
+  // O Supabase v2 processa o hash da URL dentro do onAuthStateChange
   sbClient.auth.onAuthStateChange(async (event, session) => {
-    // SIGNED_IN: login normal ou retorno do OAuth Google
-    // INITIAL_SESSION: sessão restaurada ao carregar a página
-    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+    dbg('Evento=' + event + ' user=' + (session?.user?.email || 'none'));
+    if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+      dbg('Entrando no painel...');
       await entrarNoPainel(session.user);
+      setTimeout(() => { const d = document.getElementById('_dbg'); if (d) d.remove(); }, 2000);
     } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      produtos = [];
-      renderAll();
-      mostrarLogin();
+      currentUser = null; produtos = []; renderAll(); mostrarLogin();
     }
   });
+
+  // getSession DEPOIS do listener (o listener já cuida do hash OAuth)
+  const { data: { session } } = await sbClient.auth.getSession();
+  dbg('getSession=' + (session?.user?.email || 'none'));
 }
 
 // Funções globais de login — chamadas direto pelo onclick dos botões
@@ -1513,7 +1520,10 @@ function mostrarLoading(show) {
 
 async function carregarProdutos() {
   try {
-    const data = await supaFetch('GET', '/rest/v1/produtos?select=*&order=criado_em.desc');
+    // Filtra apenas produtos do usuário logado
+    const uid = currentUser?.id;
+    const filter = uid ? `&user_id=eq.${uid}` : '';
+    const data = await supaFetch('GET', `/rest/v1/produtos?select=*&order=criado_em.desc${filter}`);
     produtos = (data || []).map(p => ({
       id: p.id,
       nome: p.nome,
@@ -1540,7 +1550,9 @@ async function carregarProdutos() {
     }));
     renderAll();
   } catch(e) {
+    console.error('Erro ao carregar produtos:', e.message);
     showToast('Erro ao carregar dados: ' + e.message, 'error');
+    renderAll(); // renderiza vazio mas não trava
   }
 }
 
