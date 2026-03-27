@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Eldorado">
+<meta name="theme-color" content="#f5c842">
+<title>Eldorado Dashboard · Controle de Vendas</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --gold: #f5c842;
+    --gold2: #e8a820;
+    --green: #2dff8a;
+    --red: #ff4d6d;
+    --blue: #4d9fff;
+    --muted: #555570;
+    --text: #e8e8f0;
+    --text2: #9898b0;
+    --radius: 12px;
+    --font: 'Syne', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,200,66,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(77,159,255,0.05) 0%, transparent 60%);
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #000;
+  }
+
+  .logo h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .logo span {
+    color: var(--gold);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .cotacao-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .cotacao-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes loadingAnim {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+  }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+  }
+
+  .btn-gold:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(245,200,66,0.3);
+  }
+
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    color: var(--text);
+  }
+
+  .btn-danger {
+    background: rgba(255,77,109,0.15);
+    color: var(--red);
+    border: 1px solid rgba(255,77,109,0.3);
+  }
+
+  .btn-danger:hover {
+    background: rgba(255,77,109,0.25);
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  /* CARDS SUMMARY */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .summary-card.gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+  .summary-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .summary-card.blue::before { background: linear-gradient(90deg, var(--blue), transparent); }
+  .summary-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+
+  .summary-card:hover { border-color: var(--muted); }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 10px;
+  }
+
+  .card-value {
+    font-size: 26px;
+    font-weight: 800;
+    font-family: var(--mono);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    width: fit-content;
+    margin-bottom: 24px;
+  }
+
+  .tab {
+    padding: 8px 20px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* SECTION LAYOUTS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* TABELA */
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .table-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .mono { font-family: var(--mono); font-size: 12px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+
+  .badge-pending { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+  .badge-sold { background: rgba(45,255,138,0.12); color: var(--green); border: 1px solid rgba(45,255,138,0.25); }
+  .badge-expired { background: rgba(255,77,109,0.12); color: var(--red); border: 1px solid rgba(255,77,109,0.25); }
+
+  .lucro-positive { color: var(--green); font-weight: 600; font-family: var(--mono); }
+  .lucro-negative { color: var(--red); font-weight: 600; font-family: var(--mono); }
+
+  .action-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .action-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+    color: var(--text2);
+  }
+
+  .action-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .action-btn.sell:hover { border-color: var(--green); color: var(--green); }
+  .action-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .modal-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-grid.full { grid-template-columns: 1fr; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group.span2 { grid-column: span 2; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  input, select, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+  }
+
+  select option { background: var(--surface); }
+
+  .preview-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 6px;
+  }
+
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .preview-row:last-child { border-bottom: none; }
+  .preview-row span:first-child { color: var(--text2); }
+  .preview-row span:last-child { font-family: var(--mono); font-weight: 600; }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* CONFIG */
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .config-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .config-card p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .input-row input { flex: 1; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 13px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast.success { border-left: 3px solid var(--green); }
+  .toast.error { border-left: 3px solid var(--red); }
+  .toast.info { border-left: 3px solid var(--gold); }
+
+  /* CALC ROWS */
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
+  }
+  .calc-row span:first-child { color: var(--text2); }
+  .calc-row span:last-child { font-family: var(--mono); font-weight: 600; }
+
+  /* SELL MODAL */
+  .sell-info-box {
+    background: rgba(45,255,138,0.05);
+    border: 1px solid rgba(45,255,138,0.2);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .sell-info-box strong { color: var(--text); }
+
+  @media (max-width: 900px) {
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    main { padding: 16px; }
+    header { padding: 14px 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.span2 { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">E</div>
+    <h1>Eldorado <span>Dashboard</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="cotacao-badge" style="gap:14px;" title="Cotação via AwesomeAPI · atualiza a cada 60s">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="dot"></div>
+        <span style="color:var(--text2);font-size:10px;letter-spacing:0.5px;">USD/BRL</span>
+      </div>
+      <span id="cotacao-bid" style="color:var(--text);font-weight:700;">carregando...</span>
+      <span id="cotacao-var" style="font-size:11px;"></span>
+      <span id="cotacao-hl" style="font-size:10px;color:var(--text2);"></span>
+      <span id="cotacao-time" style="font-size:9px;color:var(--muted);"></span>
+    </div>
+    <button class="btn btn-gold" onclick="openModal()">+ Novo Produto</button>
+  </div>
+</header>
+<div id="loading-bar" style="display:none;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:loadingAnim 1s infinite alternate;"></div>
+
+<main>
+  <!-- CARDS RESUMO -->
+  <div class="summary-grid">
+    <div class="summary-card gold">
+      <div class="card-label">Total Investido</div>
+      <div class="card-value" id="s-investido">R$ 0,00</div>
+      <div class="card-sub" id="s-investido-count">0 produtos</div>
+    </div>
+    <div class="summary-card green">
+      <div class="card-label">Lucro Total</div>
+      <div class="card-value" id="s-lucro">R$ 0,00</div>
+      <div class="card-sub" id="s-vendidos">0 vendidos</div>
+    </div>
+    <div class="summary-card blue">
+      <div class="card-label">A Receber (USD)</div>
+      <div class="card-value" id="s-receber-usd">$ 0,00</div>
+      <div class="card-sub" id="s-receber-brl">≈ R$ 0,00 em andamento</div>
+    </div>
+    <div class="summary-card red">
+      <div class="card-label">Prazo Médio de Venda</div>
+      <div class="card-value" id="s-prazo">-- dias</div>
+      <div class="card-sub">tempo médio p/ vender</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('ativos', this)">📦 Ativos</button>
+    <button class="tab" onclick="switchTab('vendidos', this)">✅ Vendidos</button>
+    <button class="tab" onclick="switchTab('calc', this)">🧮 Calculadora</button>
+    <button class="tab" onclick="switchTab('config', this)">⚙️ Configurações</button>
+  </div>
+
+  <!-- SEÇÃO: ATIVOS -->
+  <div class="section active" id="sec-ativos">
+    <div class="table-header">
+      <h2>Produtos em Andamento</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Categoria</th>
+            <th>Comprei</th>
+            <th>Venda (USD)</th>
+            <th>Taxa Eldorado</th>
+            <th>Receberei</th>
+            <th>Lucro Est.</th>
+            <th>Postado</th>
+            <th>Prazo</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-ativos">
+          <tr><td colspan="11"><div class="empty-state"><div class="icon">📦</div><p>Nenhum produto cadastrado ainda.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: VENDIDOS -->
+  <div class="section" id="sec-vendidos">
+    <div class="table-header">
+      <h2>Histórico de Vendas</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Categoria</th>
+            <th>Comprei</th>
+            <th>Venda (USD)</th>
+            <th>Taxas (Eld+Pay+Transf)</th>
+            <th>Bruto Eldorado</th>
+            <th>Líquido Final</th>
+            <th>Lucro Real Líq.</th>
+            <th>Postado</th>
+            <th>Vendido em</th>
+            <th>Dias</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-vendidos">
+          <tr><td colspan="11"><div class="empty-state"><div class="icon">✅</div><p>Nenhuma venda concluída ainda.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: CALCULADORA -->
+  <div class="section" id="sec-calc">
+    <div style="max-width:520px;margin:0 auto;">
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <div style="background:linear-gradient(135deg,var(--gold),var(--gold2));width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">🧮</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;">Calculadora Rápida</div>
+            <div style="font-size:11px;color:var(--text2);">Simule lucro antes de comprar ou postar</div>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;background:var(--surface2);padding:6px 10px;border-radius:6px;border:1px solid var(--border);">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green);"></div>
+            <span id="calc-cotacao-badge">USD: --</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div style="grid-column:span 2;">
+            <label style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">Quanto vou pagar pelo produto (R$)</label>
+            <input type="number" id="calc-compra" placeholder="0.00" step="0.01"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;"
+              oninput="calcRapida()">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">Preço de venda (USD $)</label>
+            <input type="number" id="calc-usd" placeholder="0.00" step="0.01"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;"
+              oninput="calcRapidaSyncBRL()">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text2);display:block;margin-bottom:6px;">Preço de venda (R$) <span style="color:var(--muted);font-size:9px;">↔ converte</span></label>
+            <input type="number" id="calc-brl-venda" placeholder="0.00" step="0.01"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;"
+              oninput="calcRapidaSyncUSD()">
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;">
+          <button onclick="limparCalc()" style="padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;">↺ Limpar</button>
+        </div>
+      </div>
+
+      <!-- RESULTADO -->
+      <div id="calc-resultado" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+
+        <div style="background:var(--surface2);padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);">
+          📊 Breakdown Completo
+        </div>
+
+        <div style="padding:20px;">
+          <!-- BLOCO VENDA -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;">💵 Venda & Eldorado</div>
+            <div class="calc-row">
+              <span>Preço de venda</span>
+              <span style="text-align:right;">
+                <span id="cr-venda-usd" style="color:var(--text);">$ 0,00</span>
+                <br><span id="cr-venda-brl" style="color:var(--text2);font-size:11px;">R$ 0,00</span>
+              </span>
+            </div>
+            <div class="calc-row">
+              <span>Taxa Eldorado (<span id="cr-taxa-pct">15</span>%)</span>
+              <span style="text-align:right;">
+                <span id="cr-taxa-eld" style="color:var(--red);">- $ 0,00</span>
+                <br><span id="cr-taxa-eld-brl" style="color:var(--red);font-size:11px;opacity:0.7;">R$ 0,00</span>
+              </span>
+            </div>
+            <div class="calc-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+              <span style="font-weight:600;color:var(--text);">Crédito na Payoneer</span>
+              <span style="text-align:right;">
+                <span id="cr-payoneer" style="color:var(--blue);font-weight:700;">$ 0,00</span>
+                <br><span id="cr-payoneer-brl" style="color:var(--blue);font-size:11px;opacity:0.75;">R$ 0,00</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- BLOCO SAQUE -->
+          <div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;">🏦 Saque Payoneer</div>
+            <div class="calc-row">
+              <span>Taxa percentual (4%)</span>
+              <span style="text-align:right;">
+                <span id="cr-pay-pct" style="color:var(--red);">- $ 0,00</span>
+                <br><span id="cr-pay-pct-brl" style="color:var(--red);font-size:11px;opacity:0.7;">R$ 0,00</span>
+              </span>
+            </div>
+            <div class="calc-row">
+              <span>Taxa fixa</span>
+              <span style="text-align:right;">
+                <span style="color:var(--red);">- $ 2,00</span>
+                <br><span id="cr-fixa-brl" style="color:var(--red);font-size:11px;opacity:0.7;">R$ 0,00</span>
+              </span>
+            </div>
+            <div class="calc-row">
+              <span>Taxa transferência (2%)</span>
+              <span style="text-align:right;">
+                <span id="cr-transf" style="color:var(--red);">- $ 0,00</span>
+                <br><span id="cr-transf-brl" style="color:var(--red);font-size:11px;opacity:0.7;">R$ 0,00</span>
+              </span>
+            </div>
+            <div class="calc-row" style="border-top:1px solid var(--border);margin-top:6px;padding-top:6px;">
+              <span style="font-weight:600;color:var(--text);">Líquido na sua conta</span>
+              <span style="text-align:right;">
+                <span id="cr-liq-usd" style="color:var(--green);font-weight:700;">$ 0,00</span>
+                <br><span id="cr-liq-brl" style="color:var(--green);font-size:12px;font-weight:700;">R$ 0,00</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- BLOCO LUCRO -->
+          <div style="background:var(--surface2);border-radius:10px;padding:16px;border:1px solid var(--border);">
+            <div class="calc-row" style="padding:0 0 8px 0;border-bottom:1px solid var(--border);">
+              <span style="color:var(--text2);">Paguei pelo produto</span>
+              <span id="cr-compra" style="color:var(--red);">- R$ 0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;">
+              <span style="font-size:14px;font-weight:800;">🏦 Lucro Real Líquido</span>
+              <span id="cr-lucro" style="font-size:22px;font-weight:800;font-family:var(--mono);">R$ 0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+              <span style="font-size:11px;color:var(--text2);">ROI (retorno sobre investimento)</span>
+              <span id="cr-roi" style="font-size:13px;font-weight:700;font-family:var(--mono);">--%</span>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center;">
+                <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Total de taxas</div>
+                <div id="cr-total-taxas" style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--red);">$ 0,00</div>
+                <div id="cr-total-taxas-brl" style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--red);opacity:0.7;">R$ 0,00</div>
+              </div>
+              <div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center;">
+                <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% do valor perdido em taxas</div>
+                <div id="cr-pct-taxas" style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);">--%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEÇÃO: CONFIG -->
+  <div class="section" id="sec-config">
+
+    <div class="config-card">
+      <h3>🔑 Integração com Eldorado.gg</h3>
+      <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2342534a63464f474c5142474c0d4444">[email&#160;protected]</a></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+
+      <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
+        ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
+      </div>
+
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="form-group">
+          <label>E-mail da conta Eldorado</label>
+          <input type="email" id="api-email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="api-senha" placeholder="Sua senha">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-gold" onclick="autenticarEldorado()">🔐 Conectar à Eldorado</button>
+        <button class="btn btn-ghost" onclick="sincronizarPedidos()">🔄 Sincronizar Pedidos</button>
+        <span id="auth-status" style="font-size:12px;color:var(--text2);font-family:var(--mono);">⬤ Desconectado</span>
+      </div>
+
+      <div id="token-preview" style="display:none;margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">TOKEN JWT (sessão ativa)</div>
+        <div id="token-value" style="font-family:var(--mono);font-size:10px;color:var(--green);word-break:break-all;max-height:48px;overflow:hidden;"></div>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <h3>💱 Taxa da Eldorado.gg</h3>
+      <p>A Eldorado cobra uma comissão sobre cada venda. Por padrão usa-se 5% (valor comum na plataforma). Ajuste conforme seu nível de seller.</p>
+      <div class="input-row">
+        <input type="number" id="taxa-input" placeholder="Ex: 15" min="0" max="30" step="0.1">
+        <span style="color:var(--text2); font-size:14px; white-space:nowrap;">%</span>
+        <button class="btn btn-gold" onclick="salvarTaxa()">Salvar</button>
+      </div>
+      <p style="margin-top:8px; margin-bottom:0;" id="taxa-atual">Taxa atual: <strong>5%</strong></p>
+    </div>
+
+    <div class="config-card">
+      <h3>🗑️ Limpar Dados</h3>
+      <p>Remove todos os produtos e histórico de vendas salvos localmente. <strong>Ação irreversível.</strong></p>
+      <button class="btn btn-danger" onclick="limparTudo()">Limpar Todos os Dados</button>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL: NOVO PRODUTO -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">+ Novo Produto</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group span2">
+        <label>Nome do Produto</label>
+        <input type="text" id="f-nome" placeholder="Ex: Conta CS2 Prime / Karambit Knife FN...">
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="f-cat">
+          <option value="conta">Conta</option>
+          <option value="skin">Skin / Item</option>
+          <option value="moeda">Moeda</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data de Postagem</label>
+        <input type="date" id="f-data">
+      </div>
+      <div class="form-group">
+        <label>Quanto Paguei (R$)</label>
+        <input type="number" id="f-compra" placeholder="0.00" step="0.01" oninput="calcPreview()">
+      </div>
+      <div class="form-group">
+        <label>Preço de Venda (USD $)</label>
+        <input type="number" id="f-venda-usd" placeholder="0.00" step="0.01" oninput="syncBRL()">
+      </div>
+      <div class="form-group">
+        <label>Preço de Venda (R$) <span style="color:var(--muted);font-size:9px;">← converte p/ USD</span></label>
+        <input type="number" id="f-venda-brl" placeholder="0.00" step="0.01" oninput="syncUSD()">
+      </div>
+      <div class="form-group span2">
+        <label>Observações (opcional)</label>
+        <input type="text" id="f-obs" placeholder="Detalhes adicionais...">
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-box" style="margin-top:16px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text2); margin-bottom:10px;">Breakdown Completo de Taxas</div>
+      <div class="preview-row">
+        <span>Preço de venda</span>
+        <span id="prev-usd">$ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>Taxa Eldorado (<span id="prev-taxa-pct">15</span>%)</span>
+        <span id="prev-taxa" style="color:var(--red)">- $ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>💵 Crédito na Payoneer</span>
+        <span id="prev-receber-usd" style="color:var(--blue)">$ 0,00</span>
+      </div>
+      <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+      <div class="preview-row">
+        <span>Taxa Payoneer (4% + $2 fixo)</span>
+        <span id="prev-taxa-pay" style="color:var(--red)">- $ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>Taxa transferência (2%)</span>
+        <span id="prev-taxa-transf" style="color:var(--red)">- $ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>💰 Líquido final em USD</span>
+        <span id="prev-liq-usd" style="color:var(--green)">$ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>💰 Líquido final em BRL</span>
+        <span id="prev-receber-brl" style="color:var(--green)">R$ 0,00</span>
+      </div>
+      <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+      <div class="preview-row">
+        <span>Paguei pelo produto</span>
+        <span id="prev-compra" style="color:var(--red)">- R$ 0,00</span>
+      </div>
+      <div class="preview-row" style="padding-top:8px;">
+        <span style="font-weight:700; color:var(--text);">🏦 Lucro Real Líquido</span>
+        <span id="prev-lucro" style="font-size:15px;">R$ 0,00</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="salvarProduto()">Salvar Produto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MARCAR COMO VENDIDO -->
+<div class="modal-overlay" id="sell-modal-overlay" onclick="closeSellModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✅ Marcar como Vendido</h3>
+      <button class="modal-close" onclick="closeSellModal()">✕</button>
+    </div>
+    <div class="sell-info-box">
+      Produto: <strong id="sell-nome">—</strong>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Data da Venda</label>
+        <input type="date" id="sell-data">
+      </div>
+      <div class="form-group">
+        <label>Valor Real Recebido (USD)</label>
+        <input type="number" id="sell-usd" placeholder="0.00" step="0.01" oninput="calcSellPreview()">
+      </div>
+    </div>
+    <div class="preview-box" style="margin-top:12px;">
+      <div class="preview-row">
+        <span>Recebi em USD</span>
+        <span id="sp-usd">$ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>Recebi em BRL (hoje)</span>
+        <span id="sp-brl">R$ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span>Paguei</span>
+        <span id="sp-compra" style="color:var(--red)">R$ 0,00</span>
+      </div>
+      <div class="preview-row">
+        <span style="font-weight:700; color:var(--text);">💰 Lucro Real</span>
+        <span id="sp-lucro" style="font-size:15px; color:var(--green)">R$ 0,00</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSellModal()">Cancelar</button>
+      <button class="btn btn-gold" onclick="confirmarVenda()">Confirmar Venda</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM DELETE -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--red);border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center;animation:slideUp 0.2s ease;">
+    <div id="confirm-icon" style="font-size:32px;margin-bottom:12px;">🗑️</div>
+    <h3 id="confirm-title" style="font-size:16px;font-weight:700;margin-bottom:8px;">Excluir produto?</h3>
+    <p id="confirm-desc" style="font-size:13px;color:var(--text2);margin-bottom:20px;">Esta ação não pode ser desfeita.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelarDelete()" style="padding:10px 24px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarDelete()" style="padding:10px 24px;border-radius:8px;border:none;background:var(--red);color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ===== SUPABASE CONFIG =====
+const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
+
+async function supaFetch(method, path, body = null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(SUPA_URL + path, opts);
+  if (!r.ok) { const e = await r.text(); throw new Error(e); }
+  const txt = await r.text();
+  return txt ? JSON.parse(txt) : null;
+}
+
+// ===== STATE =====
+let produtos = [];
+let taxa = parseFloat(localStorage.getItem('eldorado_taxa') || '15');
+let cotacaoUSD = 0;
+let sellIndex = null;
+let editIndex = null;
+let pendingDeleteIdx = null;
+
+// ===== INIT =====
+async function init() {
+  document.getElementById('f-data').value = hoje();
+  document.getElementById('sell-data').value = hoje();
+  document.getElementById('taxa-input').value = taxa;
+  document.getElementById('taxa-atual').innerHTML = `Taxa atual: <strong>${taxa}%</strong>`;
+  const savedEmail = localStorage.getItem('eldorado_email');
+  if (savedEmail) document.getElementById('api-email').value = savedEmail;
+  const savedToken = localStorage.getItem('eldorado_jwt');
+  if (savedToken) setAuthStatus(true, savedToken);
+  mostrarLoading(true);
+  await fetchCotacao();
+  await carregarProdutos();
+  mostrarLoading(false);
+  setInterval(fetchCotacao, 60000);
+}
+
+function mostrarLoading(show) {
+  const el = document.getElementById('loading-bar');
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+
+async function carregarProdutos() {
+  try {
+    const data = await supaFetch('GET', '/rest/v1/produtos?select=*&order=criado_em.desc');
+    produtos = (data || []).map(p => ({
+      id: p.id,
+      nome: p.nome,
+      categoria: p.categoria,
+      dataPostagem: p.data_postagem,
+      dataVenda: p.data_venda,
+      compra: parseFloat(p.compra) || 0,
+      vendaUSD: parseFloat(p.venda_usd) || 0,
+      taxaUSD: parseFloat(p.taxa_usd) || 0,
+      receberUSD: parseFloat(p.receber_usd) || 0,
+      receberBRL: parseFloat(p.receber_brl) || 0,
+      lucroEst: parseFloat(p.lucro_est) || 0,
+      liquidoUSD: parseFloat(p.liquido_usd) || 0,
+      liquidoBRL: parseFloat(p.liquido_brl) || 0,
+      usdRecebido: parseFloat(p.usd_recebido) || 0,
+      brlRecebido: parseFloat(p.brl_recebido) || 0,
+      lucroReal: parseFloat(p.lucro_real) || 0,
+      diasParaVender: p.dias_para_vender,
+      cotacaoNaCriacao: parseFloat(p.cotacao_criacao) || 0,
+      cotacaoVenda: parseFloat(p.cotacao_venda) || 0,
+      status: p.status || 'ativo',
+      obs: p.obs || '',
+      eldoradoId: p.eldorado_id
+    }));
+    renderAll();
+  } catch(e) {
+    showToast('Erro ao carregar dados: ' + e.message, 'error');
+  }
+}
+
+function hoje() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ===== COTACAO =====
+async function fetchCotacao() {
+  try {
+    const r = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+    const d = await r.json();
+    const c = d.USDBRL;
+    cotacaoUSD = parseFloat(c.bid);
+    const variacao = parseFloat(c.pctChange);
+    const high = parseFloat(c.high);
+    const low = parseFloat(c.low);
+    const ts = new Date(parseInt(c.timestamp) * 1000);
+    const hora = ts.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+    document.getElementById('cotacao-bid').textContent = `R$ ${cotacaoUSD.toFixed(4)}`;
+    const varEl = document.getElementById('cotacao-var');
+    varEl.textContent = `${variacao >= 0 ? '+' : ''}${variacao.toFixed(2)}%`;
+    varEl.style.color = variacao >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('cotacao-hl').textContent = `↑${high.toFixed(2)} ↓${low.toFixed(2)}`;
+    document.getElementById('cotacao-time').textContent = `${hora}`;
+
+    // Recalcular campo BRL do modal se estiver aberto
+    calcPreview();
+  } catch(e) {
+    cotacaoUSD = 5.7;
+    document.getElementById('cotacao-bid').textContent = `R$ ${cotacaoUSD.toFixed(2)}`;
+    document.getElementById('cotacao-var').textContent = 'offline';
+    document.getElementById('cotacao-var').style.color = 'var(--muted)';
+    document.getElementById('cotacao-hl').textContent = '';
+    document.getElementById('cotacao-time').textContent = '';
+  }
+}
+
+// Sincronização bidirecional USD <-> BRL
+function syncBRL() {
+  const usd = parseFloat(document.getElementById('f-venda-usd').value) || 0;
+  if (cotacaoUSD > 0 && usd > 0) {
+    document.getElementById('f-venda-brl').value = (usd * cotacaoUSD).toFixed(2);
+  } else {
+    document.getElementById('f-venda-brl').value = '';
+  }
+  calcPreview();
+}
+
+function syncUSD() {
+  const brl = parseFloat(document.getElementById('f-venda-brl').value) || 0;
+  if (cotacaoUSD > 0 && brl > 0) {
+    const usd = brl / cotacaoUSD;
+    document.getElementById('f-venda-usd').value = usd.toFixed(4);
+  } else {
+    document.getElementById('f-venda-usd').value = '';
+  }
+  calcPreview();
+}
+
+// ===== TABS =====
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('sec-' + tab).classList.add('active');
+}
+
+// ===== MODAL PRODUTO =====
+function openModal(idx = null) {
+  editIndex = idx;
+  document.getElementById('modal-title').textContent = idx !== null ? '✏️ Editar Produto' : '+ Novo Produto';
+  if (idx !== null) {
+    const p = produtos[idx];
+    document.getElementById('f-nome').value = p.nome;
+    document.getElementById('f-cat').value = p.categoria;
+    document.getElementById('f-data').value = p.dataPostagem;
+    document.getElementById('f-compra').value = p.compra;
+    document.getElementById('f-venda-usd').value = p.vendaUSD;
+    document.getElementById('f-venda-brl').value = (p.vendaUSD * cotacaoUSD).toFixed(2);
+    document.getElementById('f-obs').value = p.obs || '';
+  } else {
+    document.getElementById('f-nome').value = '';
+    document.getElementById('f-cat').value = 'conta';
+    document.getElementById('f-data').value = hoje();
+    document.getElementById('f-compra').value = '';
+    document.getElementById('f-venda-usd').value = '';
+    document.getElementById('f-venda-brl').value = '';
+    document.getElementById('f-obs').value = '';
+  }
+  calcPreview();
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target.id === 'modal-overlay') closeModal();
+}
+
+function calcTaxas(usd, compra) {
+  const taxaEldorado = usd * (taxa / 100);
+  const creditoPayoneer = usd - taxaEldorado;
+  const taxaPayPct = creditoPayoneer * 0.04;
+  const taxaPayFixa = 2;
+  const taxaPayTotal = taxaPayPct + taxaPayFixa;
+  const aposPayoneer = creditoPayoneer - taxaPayTotal;
+  const taxaTransf = aposPayoneer * 0.02;
+  const liquidoUSD = aposPayoneer - taxaTransf;
+  const liquidoBRL = liquidoUSD * cotacaoUSD;
+  const lucroLiq = liquidoBRL - compra;
+  return { taxaEldorado, creditoPayoneer, taxaPayPct, taxaPayFixa, taxaPayTotal, aposPayoneer, taxaTransf, liquidoUSD, liquidoBRL, lucroLiq };
+}
+
+function calcPreview() {
+  const usd = parseFloat(document.getElementById('f-venda-usd').value) || 0;
+  const compra = parseFloat(document.getElementById('f-compra').value) || 0;
+  const t = calcTaxas(usd, compra);
+
+  document.getElementById('prev-taxa-pct').textContent = taxa;
+  document.getElementById('prev-usd').textContent = `$ ${usd.toFixed(2)}`;
+  document.getElementById('prev-taxa').textContent = `- $ ${t.taxaEldorado.toFixed(2)}`;
+  document.getElementById('prev-receber-usd').textContent = `$ ${t.creditoPayoneer.toFixed(2)}`;
+  document.getElementById('prev-taxa-pay').textContent = `- $ ${t.taxaPayTotal.toFixed(2)} (4% + $2)`;
+  document.getElementById('prev-taxa-transf').textContent = `- $ ${t.taxaTransf.toFixed(2)}`;
+  document.getElementById('prev-liq-usd').textContent = `$ ${t.liquidoUSD.toFixed(2)}`;
+  document.getElementById('prev-receber-brl').textContent = `R$ ${t.liquidoBRL.toFixed(2)}`;
+  document.getElementById('prev-compra').textContent = `- R$ ${compra.toFixed(2)}`;
+  const el = document.getElementById('prev-lucro');
+  el.textContent = `R$ ${t.lucroLiq.toFixed(2)}`;
+  el.style.color = t.lucroLiq >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+async function salvarProduto() {
+  const nome = document.getElementById('f-nome').value.trim();
+  const categoria = document.getElementById('f-cat').value;
+  const dataPostagem = document.getElementById('f-data').value;
+  const compra = parseFloat(document.getElementById('f-compra').value);
+  const vendaUSD = parseFloat(document.getElementById('f-venda-usd').value);
+  const obs = document.getElementById('f-obs').value.trim();
+
+  if (!nome || isNaN(compra) || isNaN(vendaUSD)) {
+    showToast('Preencha todos os campos obrigatórios!', 'error');
+    return;
+  }
+
+  const t = calcTaxas(vendaUSD, compra);
+  const row = {
+    nome, categoria, obs,
+    data_postagem: dataPostagem,
+    compra, venda_usd: vendaUSD,
+    taxa_usd: t.taxaEldorado,
+    receber_usd: t.creditoPayoneer,
+    receber_brl: t.liquidoBRL,
+    lucro_est: t.lucroLiq,
+    liquido_usd: t.liquidoUSD,
+    liquido_brl: t.liquidoBRL,
+    cotacao_criacao: cotacaoUSD,
+    status: 'ativo'
+  };
+
+  try {
+    if (editIndex !== null && produtos[editIndex].id) {
+      // UPDATE
+      row.status = produtos[editIndex].status;
+      await supaFetch('PATCH', `/rest/v1/produtos?id=eq.${produtos[editIndex].id}`, row);
+      showToast('Produto atualizado!', 'success');
+    } else {
+      // INSERT
+      await supaFetch('POST', '/rest/v1/produtos', row);
+      showToast('Produto adicionado!', 'success');
+    }
+    closeModal();
+    await carregarProdutos();
+  } catch(e) {
+    showToast('Erro ao salvar: ' + e.message, 'error');
+  }
+}
+
+// ===== MODAL VENDA =====
+function openSellModal(idx) {
+  sellIndex = idx;
+  const p = produtos[idx];
+  document.getElementById('sell-nome').textContent = p.nome;
+  document.getElementById('sell-data').value = hoje();
+  document.getElementById('sell-usd').value = p.receberUSD.toFixed(2);
+  document.getElementById('sp-compra').textContent = `R$ ${p.compra.toFixed(2)}`;
+  calcSellPreview();
+  document.getElementById('sell-modal-overlay').classList.add('open');
+}
+
+function closeSellModal() {
+  document.getElementById('sell-modal-overlay').classList.remove('open');
+}
+
+function closeSellModalOnOverlay(e) {
+  if (e.target.id === 'sell-modal-overlay') closeSellModal();
+}
+
+function calcSellPreview() {
+  const usd = parseFloat(document.getElementById('sell-usd').value) || 0;
+  const compra = sellIndex !== null ? produtos[sellIndex].compra : 0;
+  const brl = usd * cotacaoUSD;
+  const lucro = brl - compra;
+  document.getElementById('sp-usd').textContent = `$ ${usd.toFixed(2)}`;
+  document.getElementById('sp-brl').textContent = `R$ ${brl.toFixed(2)}`;
+  document.getElementById('sp-compra').textContent = `R$ ${compra.toFixed(2)}`;
+  const el = document.getElementById('sp-lucro');
+  el.textContent = `R$ ${lucro.toFixed(2)}`;
+  el.style.color = lucro >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+async function confirmarVenda() {
+  const p = produtos[sellIndex];
+  const dataVenda = document.getElementById('sell-data').value;
+  const usdRecebido = parseFloat(document.getElementById('sell-usd').value) || 0;
+  const brlRecebido = usdRecebido * cotacaoUSD;
+  const lucroReal = brlRecebido - p.compra;
+  const post = new Date(p.dataPostagem);
+  const venda = new Date(dataVenda);
+  const dias = Math.round((venda - post) / (1000 * 60 * 60 * 24));
+
+  try {
+    await supaFetch('PATCH', `/rest/v1/produtos?id=eq.${p.id}`, {
+      status: 'vendido',
+      data_venda: dataVenda,
+      usd_recebido: usdRecebido,
+      brl_recebido: brlRecebido,
+      lucro_real: lucroReal,
+      dias_para_vender: dias,
+      cotacao_venda: cotacaoUSD
+    });
+    closeSellModal();
+    await carregarProdutos();
+    showToast(`Venda registrada! Lucro: R$ ${lucroReal.toFixed(2)}`, 'success');
+  } catch(e) {
+    showToast('Erro ao registrar venda: ' + e.message, 'error');
+  }
+}
+
+
+
+async function confirmarDelete() {
+  const modal = document.getElementById('confirm-modal');
+  const mode = modal.dataset.mode;
+  modal.style.display = 'none';
+  modal.dataset.mode = '';
+
+  if (mode === 'limpar') {
+    try {
+      await supaFetch('DELETE', '/rest/v1/produtos?id=neq.00000000-0000-0000-0000-000000000000');
+      await carregarProdutos();
+      showToast('Todos os dados removidos.', 'info');
+    } catch(e) {
+      showToast('Erro ao limpar: ' + e.message, 'error');
+    }
+    return;
+  }
+
+  if (pendingDeleteIdx === null) return;
+  const p = produtos[pendingDeleteIdx];
+  try {
+    await supaFetch('DELETE', `/rest/v1/produtos?id=eq.${p.id}`);
+    pendingDeleteIdx = null;
+    await carregarProdutos();
+    showToast('Produto removido.', 'info');
+  } catch(e) {
+    pendingDeleteIdx = null;
+    showToast('Erro ao remover: ' + e.message, 'error');
+  }
+}
+
+function excluirProduto(idx) {
+  pendingDeleteIdx = idx;
+  const modal = document.getElementById('confirm-modal');
+  modal.dataset.mode = 'delete';
+  document.getElementById('confirm-icon').textContent = '🗑️';
+  document.getElementById('confirm-title').textContent = 'Excluir produto?';
+  document.getElementById('confirm-desc').textContent = 'Esta ação não pode ser desfeita.';
+  modal.style.display = 'flex';
+}
+
+function cancelarDelete() {
+  pendingDeleteIdx = null;
+  document.getElementById('confirm-modal').style.display = 'none';
+}
+
+// ===== RENDER =====
+function renderAll() {
+  renderAtivos();
+  renderVendidos();
+  renderSummary();
+}
+
+function catIcon(cat) {
+  const map = { conta: '👤', skin: '🎨', moeda: '💰', outro: '📦' };
+  return map[cat] || '📦';
+}
+
+function fmtDate(d) {
+  if (!d) return '--';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function renderAtivos() {
+  const ativos = produtos.map((p,i) => ({...p,_i:i})).filter(p => p.status === 'ativo');
+  const tb = document.getElementById('tbody-ativos');
+  if (ativos.length === 0) {
+    tb.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="icon">📦</div><p>Nenhum produto ativo. Clique em <strong>+ Novo Produto</strong> para começar!</p></div></td></tr>`;
+    return;
+  }
+
+  const hoje = new Date();
+  tb.innerHTML = ativos.map(p => {
+    const lucroClass = p.lucroEst >= 0 ? 'lucro-positive' : 'lucro-negative';
+    const lucroPfx = p.lucroEst >= 0 ? '+' : '';
+    const diasPostado = Math.round((hoje - new Date(p.dataPostagem)) / (1000*60*60*24));
+    return `<tr>
+      <td><strong>${p.nome}</strong>${p.obs ? `<br><span style="color:var(--text2);font-size:11px;">${p.obs}</span>` : ''}</td>
+      <td>${catIcon(p.categoria)} ${p.categoria}</td>
+      <td class="mono">R$ ${p.compra.toFixed(2)}</td>
+      <td class="mono">$ ${p.vendaUSD.toFixed(2)}</td>
+      <td class="mono" style="color:var(--red);font-size:11px;">Eld: -$${p.taxaUSD.toFixed(2)}<br>Pay+Transf: ~-$${((p.receberUSD*0.04)+2+(p.receberUSD*0.96*0.02)).toFixed(2)}</td>
+      <td class="mono" style="color:var(--blue)">$ ${p.receberUSD.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">Eldorado bruto</span></td>
+      <td class="${lucroClass}">${lucroPfx}R$ ${p.lucroEst.toFixed(2)}<br><span style="color:var(--text2);font-size:10px;">líquido final</span></td>
+      <td class="mono">${fmtDate(p.dataPostagem)}</td>
+      <td class="mono">${diasPostado}d postado</td>
+      <td><span class="badge badge-pending">⏳ Ativo</span></td>
+      <td><div class="action-btns">
+        <button class="action-btn sell" title="Marcar como vendido" data-sell="${p._i}">✓</button>
+        <button class="action-btn" title="Editar" data-edit="${p._i}">✏️</button>
+        <button class="action-btn del" title="Excluir" data-del="${p._i}">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  // Event listeners para botões ativos
+  tb.querySelectorAll('[data-sell]').forEach(btn => {
+    btn.addEventListener('click', () => openSellModal(parseInt(btn.dataset.sell)));
+  });
+  tb.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openModal(parseInt(btn.dataset.edit)));
+  });
+  tb.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => excluirProduto(parseInt(btn.dataset.del)));
+  });
+}
+
+function renderVendidos() {
+  const vendidos = produtos.map((p,i) => ({...p,_i:i})).filter(p => p.status === 'vendido');
+  const tb = document.getElementById('tbody-vendidos');
+  if (vendidos.length === 0) {
+    tb.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="icon">✅</div><p>Nenhuma venda concluída ainda.</p></div></td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = vendidos.map(p => {
+    const lucroClass = p.lucroReal >= 0 ? 'lucro-positive' : 'lucro-negative';
+    const lucroPfx = p.lucroReal >= 0 ? '+' : '';
+    // Taxas completas
+    const usdVendido = p.usdRecebido || p.receberUSD || 0;
+    const taxaPayPct = usdVendido * 0.04;
+    const taxaPayFixa = 2;
+    const aposPayoneer = usdVendido - taxaPayPct - taxaPayFixa;
+    const taxaTransf = aposPayoneer * 0.02;
+    const finalUSD = aposPayoneer - taxaTransf;
+    const finalBRL = finalUSD * cotacaoUSD;
+    const lucroRealLiq = finalBRL - p.compra;
+    const lucroLiqClass = lucroRealLiq >= 0 ? 'lucro-positive' : 'lucro-negative';
+    const lucroLiqPfx = lucroRealLiq >= 0 ? '+' : '';
+    return `<tr>
+      <td><strong>${p.nome}</strong></td>
+      <td>${catIcon(p.categoria)} ${p.categoria}</td>
+      <td class="mono">R$ ${p.compra.toFixed(2)}</td>
+      <td class="mono">$ ${p.vendaUSD.toFixed(2)}</td>
+      <td class="mono" style="color:var(--red);font-size:11px;">
+        Eldorado: -$${p.taxaUSD.toFixed(2)}<br>
+        Payoneer: -$${(taxaPayPct+taxaPayFixa).toFixed(2)}<br>
+        Transf: -$${taxaTransf.toFixed(2)}
+      </td>
+      <td class="mono" style="color:var(--blue)">$ ${usdVendido.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">≈ R$ ${(usdVendido*cotacaoUSD).toFixed(2)}</span></td>
+      <td class="mono" style="color:var(--green)">$ ${finalUSD.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">≈ R$ ${finalBRL.toFixed(2)}</span></td>
+      <td class="${lucroLiqClass}">${lucroLiqPfx}R$ ${lucroRealLiq.toFixed(2)}</td>
+      <td class="mono">${fmtDate(p.dataPostagem)}</td>
+      <td class="mono">${fmtDate(p.dataVenda)}</td>
+      <td class="mono">${p.diasParaVender ?? '--'} dias</td>
+      <td><div class="action-btns">
+        <button class="action-btn del" title="Remover" data-idx="${p._i}">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  // Event listeners para botões gerados dinamicamente
+  tb.querySelectorAll('.action-btn.del').forEach(btn => {
+    btn.addEventListener('click', () => excluirProduto(parseInt(btn.dataset.idx)));
+  });
+}
+
+function renderSummary() {
+  const ativos = produtos.filter(p => p.status === 'ativo');
+  const vendidos = produtos.filter(p => p.status === 'vendido');
+
+  const totalInvestido = produtos.reduce((a, p) => a + p.compra, 0);
+  const lucroTotal = vendidos.reduce((a, p) => a + (p.lucroReal || 0), 0);
+  const receberUSD = ativos.reduce((a, p) => a + p.receberUSD, 0);
+  const receberBRL = receberUSD * cotacaoUSD;
+
+  const prazos = vendidos.filter(p => p.diasParaVender != null).map(p => p.diasParaVender);
+  const prazoMedio = prazos.length ? Math.round(prazos.reduce((a,b)=>a+b,0)/prazos.length) : null;
+
+  document.getElementById('s-investido').textContent = `R$ ${totalInvestido.toFixed(2)}`;
+  document.getElementById('s-investido-count').textContent = `${produtos.length} produto(s)`;
+  const lucroEl = document.getElementById('s-lucro');
+  lucroEl.textContent = `R$ ${lucroTotal.toFixed(2)}`;
+  lucroEl.style.color = lucroTotal >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('s-vendidos').textContent = `${vendidos.length} vendido(s)`;
+  document.getElementById('s-receber-usd').textContent = `$ ${receberUSD.toFixed(2)}`;
+  document.getElementById('s-receber-brl').textContent = `≈ R$ ${receberBRL.toFixed(2)} em andamento`;
+  document.getElementById('s-prazo').textContent = prazoMedio != null ? `${prazoMedio} dias` : '-- dias';
+}
+
+// ===== AUTENTICAÇÃO ELDORADO (AWS COGNITO) =====
+const CLIENT_ID = '1956req5ro9drdtbf5i6kis4la';
+
+async function autenticarEldorado() {
+  const email = document.getElementById('api-email').value.trim();
+  const senha = document.getElementById('api-senha').value;
+  if (!email || !senha) { showToast('Preencha e-mail e senha!', 'error'); return; }
+
+  const statusEl = document.getElementById('auth-status');
+  statusEl.textContent = '⬤ Conectando...';
+  statusEl.style.color = 'var(--gold)';
+
+  try {
+    const initResp = await fetch('https://cognito-idp.us-east-2.amazonaws.com/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth'
+      },
+      body: JSON.stringify({
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: CLIENT_ID,
+        AuthParameters: { USERNAME: email, PASSWORD: senha }
+      })
+    });
+
+    const data = await initResp.json();
+
+    if (data.AuthenticationResult?.IdToken) {
+      const token = data.AuthenticationResult.IdToken;
+      localStorage.setItem('eldorado_jwt', token);
+      localStorage.setItem('eldorado_email', email);
+      setAuthStatus(true, token);
+      showToast('Conectado à Eldorado com sucesso!', 'success');
+    } else {
+      throw new Error(data.message || data.__type || 'Credenciais inválidas ou conta não autorizada para API.');
+    }
+  } catch(e) {
+    statusEl.textContent = '⬤ Erro de autenticação';
+    statusEl.style.color = 'var(--red)';
+    showToast('Erro: ' + (e.message || 'Verifique suas credenciais.'), 'error');
+  }
+}
+
+function setAuthStatus(connected, token = null) {
+  const statusEl = document.getElementById('auth-status');
+  const tokenPreview = document.getElementById('token-preview');
+  if (connected && token) {
+    statusEl.textContent = '⬤ Conectado';
+    statusEl.style.color = 'var(--green)';
+    tokenPreview.style.display = 'block';
+    document.getElementById('token-value').textContent = token.substring(0, 80) + '...';
+  } else {
+    statusEl.textContent = '⬤ Desconectado';
+    statusEl.style.color = 'var(--text2)';
+    tokenPreview.style.display = 'none';
+  }
+}
+
+async function sincronizarPedidos() {
+  const token = localStorage.getItem('eldorado_jwt');
+  if (!token) { showToast('Conecte-se primeiro!', 'error'); return; }
+  showToast('Buscando pedidos na Eldorado...', 'info');
+  try {
+    const resp = await fetch('https://eldorado.gg/api/orders/me', {
+      headers: { 'Cookie': `__Host-EldoradoIdToken=${token}`, 'Accept': 'application/json' }
+    });
+    if (!resp.ok) throw new Error('Token expirado ou não autorizado.');
+    const data = await resp.json();
+    processarPedidosEldorado(data);
+    showToast(`Pedidos sincronizados!`, 'success');
+  } catch(e) {
+    showToast('Erro ao sincronizar: ' + e.message, 'error');
+  }
+}
+
+function processarPedidosEldorado(pedidos) {
+  if (!Array.isArray(pedidos)) return;
+  let novos = 0;
+  pedidos.forEach(pedido => {
+    const jaExiste = produtos.some(p => p.eldoradoId === pedido.id);
+    if (!jaExiste && pedido.status === 'completed') {
+      produtos.push({
+        nome: pedido.title || 'Pedido #' + pedido.id,
+        categoria: 'outro',
+        dataPostagem: pedido.createdAt?.split('T')[0] || hoje(),
+        dataVenda: pedido.completedAt?.split('T')[0] || hoje(),
+        compra: 0,
+        vendaUSD: pedido.price || 0,
+        taxaUSD: (pedido.price || 0) * (taxa / 100),
+        receberUSD: (pedido.price || 0) * (1 - taxa / 100),
+        receberBRL: (pedido.price || 0) * (1 - taxa / 100) * cotacaoUSD,
+        lucroEst: 0,
+        status: 'vendido',
+        usdRecebido: (pedido.price || 0) * (1 - taxa / 100),
+        brlRecebido: (pedido.price || 0) * (1 - taxa / 100) * cotacaoUSD,
+        lucroReal: (pedido.price || 0) * (1 - taxa / 100) * cotacaoUSD,
+        diasParaVender: 0,
+        eldoradoId: pedido.id,
+        cotacaoVenda: cotacaoUSD
+      });
+      novos++;
+    }
+  });
+  if (novos > 0) { salvar(); renderAll(); }
+}
+
+// ===== CONFIG =====
+
+function salvarTaxa() {
+  const val = parseFloat(document.getElementById('taxa-input').value);
+  if (isNaN(val) || val < 0 || val > 100) {
+    showToast('Taxa inválida!', 'error');
+    return;
+  }
+  taxa = val;
+  localStorage.setItem('eldorado_taxa', taxa);
+  document.getElementById('taxa-atual').innerHTML = `Taxa atual: <strong>${taxa}%</strong>`;
+  showToast(`Taxa atualizada para ${taxa}%`, 'success');
+  // Recalcular produtos ativos
+  produtos.forEach((p, i) => {
+    if (p.status === 'ativo') {
+      const taxaUSD = p.vendaUSD * (taxa / 100);
+      const receberUSD = p.vendaUSD - taxaUSD;
+      const receberBRL = receberUSD * cotacaoUSD;
+      const lucroEst = receberBRL - p.compra;
+      produtos[i] = { ...p, taxaUSD, receberUSD, receberBRL, lucroEst };
+    }
+  });
+  salvar();
+  renderAll();
+}
+
+async function limparTudo() {
+  const modal = document.getElementById('confirm-modal');
+  modal.dataset.mode = 'limpar';
+  document.getElementById('confirm-icon').textContent = '⚠️';
+  document.getElementById('confirm-title').textContent = 'Limpar todos os dados?';
+  document.getElementById('confirm-desc').textContent = 'Todos os produtos e vendas serão apagados do banco. Irreversível.';
+  modal.style.display = 'flex';
+}
+
+// ===== STORAGE (Supabase) =====
+// Dados persistidos no Supabase — localStorage só para taxa e config
+function salvar() { /* no-op: dados salvos no Supabase */ }
+
+// ===== TOAST =====
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  t.innerHTML = `${icons[type]} ${msg}`;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===== CALCULADORA RÁPIDA =====
+function calcRapidaSyncBRL() {
+  const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
+  if (cotacaoUSD > 0 && usd > 0) {
+    document.getElementById('calc-brl-venda').value = (usd * cotacaoUSD).toFixed(2);
+  } else {
+    document.getElementById('calc-brl-venda').value = '';
+  }
+  calcRapida();
+}
+
+function calcRapidaSyncUSD() {
+  const brl = parseFloat(document.getElementById('calc-brl-venda').value) || 0;
+  if (cotacaoUSD > 0 && brl > 0) {
+    document.getElementById('calc-usd').value = (brl / cotacaoUSD).toFixed(4);
+  } else {
+    document.getElementById('calc-usd').value = '';
+  }
+  calcRapida();
+}
+
+function calcRapida() {
+  const usd = parseFloat(document.getElementById('calc-usd').value) || 0;
+  const compra = parseFloat(document.getElementById('calc-compra').value) || 0;
+  if (usd === 0) return;
+
+  const t = calcTaxas(usd, compra);
+
+  // Atualizar badge de cotação na calculadora
+  document.getElementById('calc-cotacao-badge').textContent = `USD: R$ ${cotacaoUSD.toFixed(4)}`;
+
+  // Preencher resultado
+  const brl = (v) => `R$ ${(v * cotacaoUSD).toFixed(2)}`;
+
+  document.getElementById('cr-venda-usd').textContent = `$ ${usd.toFixed(2)}`;
+  document.getElementById('cr-venda-brl').textContent = brl(usd);
+  document.getElementById('cr-taxa-pct').textContent = taxa;
+  document.getElementById('cr-taxa-eld').textContent = `- $ ${t.taxaEldorado.toFixed(2)}`;
+  document.getElementById('cr-taxa-eld-brl').textContent = `- ${brl(t.taxaEldorado)}`;
+  document.getElementById('cr-payoneer').textContent = `$ ${t.creditoPayoneer.toFixed(2)}`;
+  document.getElementById('cr-payoneer-brl').textContent = brl(t.creditoPayoneer);
+  document.getElementById('cr-pay-pct').textContent = `- $ ${t.taxaPayPct.toFixed(2)}`;
+  document.getElementById('cr-pay-pct-brl').textContent = `- ${brl(t.taxaPayPct)}`;
+  document.getElementById('cr-fixa-brl').textContent = `- ${brl(2)}`;
+  document.getElementById('cr-transf').textContent = `- $ ${t.taxaTransf.toFixed(2)}`;
+  document.getElementById('cr-transf-brl').textContent = `- ${brl(t.taxaTransf)}`;
+  document.getElementById('cr-liq-usd').textContent = `$ ${t.liquidoUSD.toFixed(2)}`;
+  document.getElementById('cr-liq-brl').textContent = `R$ ${t.liquidoBRL.toFixed(2)}`;
+
+  const lucroEl = document.getElementById('cr-lucro');
+  lucroEl.textContent = `R$ ${t.lucroLiq.toFixed(2)}`;
+  lucroEl.style.color = t.lucroLiq >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('cr-compra').textContent = `- R$ ${compra.toFixed(2)}`;
+
+  const roi = compra > 0 ? (t.lucroLiq / compra * 100) : 0;
+  const roiEl = document.getElementById('cr-roi');
+  roiEl.textContent = `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`;
+  roiEl.style.color = roi >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const totalTaxasUSD = t.taxaEldorado + t.taxaPayTotal + t.taxaTransf;
+  const pctTaxas = usd > 0 ? (totalTaxasUSD / usd * 100) : 0;
+  document.getElementById('cr-total-taxas').textContent = `$ ${totalTaxasUSD.toFixed(2)}`;
+  document.getElementById('cr-total-taxas-brl').textContent = `R$ ${(totalTaxasUSD * cotacaoUSD).toFixed(2)}`;
+  document.getElementById('cr-pct-taxas').textContent = `${pctTaxas.toFixed(1)}%`;
+
+  document.getElementById('calc-resultado').style.display = 'block';
+}
+
+function limparCalc() {
+  ['calc-compra','calc-usd','calc-brl-venda'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('calc-resultado').style.display = 'none';
+}
+
+// ===== EXPOR FUNÇÕES AO ESCOPO GLOBAL (fix iframe) =====
+window.openModal = openModal;
+window.confirmarDelete = confirmarDelete;
+window.cancelarDelete = cancelarDelete;
+window.closeModal = closeModal;
+window.closeModalOnOverlay = closeModalOnOverlay;
+window.openSellModal = openSellModal;
+window.closeSellModal = closeSellModal;
+window.closeSellModalOnOverlay = closeSellModalOnOverlay;
+window.salvarProduto = salvarProduto;
+window.confirmarVenda = confirmarVenda;
+window.excluirProduto = excluirProduto;
+window.calcPreview = calcPreview;
+window.calcSellPreview = calcSellPreview;
+window.syncBRL = syncBRL;
+window.syncUSD = syncUSD;
+window.switchTab = switchTab;
+window.salvarTaxa = salvarTaxa;
+window.limparTudo = limparTudo;
+window.autenticarEldorado = autenticarEldorado;
+window.sincronizarPedidos = sincronizarPedidos;
+window.calcRapida = calcRapida;
+window.calcRapidaSyncBRL = calcRapidaSyncBRL;
+window.calcRapidaSyncUSD = calcRapidaSyncUSD;
+window.limparCalc = limparCalc;
+window.confirmarDelete = confirmarDelete;
+window.cancelarDelete = cancelarDelete;
+
+// Inicializar após DOM pronto
+document.addEventListener('DOMContentLoaded', init);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('SW registrado'))
+      .catch(e => console.warn('SW falhou:', e));
+  });
+}
+</script>
+</body>
+</html>
