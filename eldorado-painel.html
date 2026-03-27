@@ -1309,12 +1309,12 @@
 // ===== SUPABASE AUTH + CONFIG =====
 const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
-let supabase = null;
+let sbClient = null;
 let currentUser = null;
 
 async function supaFetch(method, path, body = null) {
-  if (!supabase) throw new Error('Supabase não inicializado');
-  const session = await supabase.auth.getSession();
+  if (!sbClient) throw new Error('Supabase não inicializado');
+  const session = await sbClient.auth.getSession();
   const token = session?.data?.session?.access_token || SUPA_KEY;
   const opts = {
     method,
@@ -1371,8 +1371,8 @@ document.addEventListener('click', (e) => {
 });
 
 async function logout() {
-  if (!supabase) return;
-  await supabase.auth.signOut();
+  if (!sbClient) return;
+  await sbClient.auth.signOut();
   currentUser = null;
   produtos = [];
   renderAll();
@@ -1400,13 +1400,13 @@ function showLoginError(msg) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 1. Inicializar Supabase
-  supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
   // 2. Rodar init (configura campos, datas, taxa)
   await init();
 
   // 3. Verificar sessão já existente
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sbClient.auth.getSession();
   if (session?.user) {
     setUserUI(session.user);
     esconderLogin();
@@ -1419,7 +1419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Botão Google
   document.getElementById('btn-google').addEventListener('click', async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await sbClient.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: 'https://eldorado-dashboard-eight.vercel.app/eldorado-painel.html' }
     });
@@ -1437,9 +1437,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let error;
     if (loginMode === 'entrar') {
-      ({ error } = await supabase.auth.signInWithPassword({ email, password: senha }));
+      ({ error } = await sbClient.auth.signInWithPassword({ email, password: senha }));
     } else {
-      ({ error } = await supabase.auth.signUp({ email, password: senha }));
+      ({ error } = await sbClient.auth.signUp({ email, password: senha }));
       if (!error) {
         showLoginError('Conta criada! Verifique seu e-mail para confirmar.');
         btn.disabled = false;
@@ -1465,7 +1465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Escutar mudanças de auth (login/logout/redirect OAuth)
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  sbClient.auth.onAuthStateChange(async (event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
       const isNewUser = !currentUser || currentUser.id !== session.user.id;
       setUserUI(session.user);
