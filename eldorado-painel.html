@@ -1786,12 +1786,14 @@ async function salvarProduto() {
   const nome = document.getElementById('f-nome').value.trim();
   const categoria = document.getElementById('f-cat').value;
   const dataPostagem = document.getElementById('f-data').value;
-  const compra = parseFloat(document.getElementById('f-compra').value);
+  const loteId = document.getElementById('f-lote').value || null;
+  // Se produto é de lote, custo é 0 (custo está no lote)
+  const compra = loteId ? 0 : (parseFloat(document.getElementById('f-compra').value) || 0);
   const vendaUSD = parseFloat(document.getElementById('f-venda-usd').value);
   const obs = document.getElementById('f-obs').value.trim();
 
-  if (!nome || isNaN(compra) || isNaN(vendaUSD)) {
-    showToast('Preencha todos os campos obrigatórios!', 'error');
+  if (!nome || isNaN(vendaUSD) || vendaUSD <= 0) {
+    showToast('Preencha nome e preço de venda!', 'error');
     return;
   }
 
@@ -1800,7 +1802,7 @@ async function salvarProduto() {
     nome, categoria, obs,
     data_postagem: dataPostagem,
     compra, venda_usd: vendaUSD,
-    lote_id: document.getElementById('f-lote').value || null,
+    lote_id: loteId,
     taxa_usd: t.taxaEldorado,
     receber_usd: t.creditoPayoneer,
     receber_brl: t.liquidoBRL,
