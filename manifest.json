@@ -2,20 +2,21 @@
   "name": "Eldorado Dashboard",
   "short_name": "Eldorado",
   "description": "Controle de vendas e calculadora para vendedores da Eldorado.gg",
-  "start_url": "./eldorado-painel.html",
+  "start_url": "/eldorado-painel.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#f5c842",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

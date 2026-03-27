@@ -1,10 +1,11 @@
 const CACHE_NAME = 'eldorado-v1';
 const ASSETS = [
-  './eldorado-painel.html',
-  './manifest.json'
+  '/eldorado-painel.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
-// Instala e faz cache dos arquivos principais
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
@@ -12,7 +13,6 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// Remove caches antigos ao ativar nova versão
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -22,11 +22,10 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Estratégia: Network First para APIs externas, Cache First para assets
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // APIs externas (cotação, Eldorado) → sempre tenta rede primeiro
+  // APIs externas (cotação, Supabase) → sempre tenta rede primeiro
   if (url.hostname !== location.hostname) {
     e.respondWith(
       fetch(e.request).catch(() => caches.match(e.request))
