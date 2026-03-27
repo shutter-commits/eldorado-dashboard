@@ -1300,7 +1300,7 @@
     </div>
 
     <div class="login-toggle" id="login-toggle-text">
-      <span id="login-toggle-label">Não tem conta? </span><span id="login-toggle-btn" onclick="setLoginMode(loginMode === 'entrar' ? 'cadastrar' : 'entrar')">Cadastrar</span>
+      <span id="login-toggle-label">Não tem conta? </span><span id="login-toggle-btn" onclick="window.setLoginMode(window.loginMode === 'entrar' ? 'cadastrar' : 'entrar')">Cadastrar</span>
     </div>
   </div>
 </div>
@@ -1340,6 +1340,7 @@ let sellIndex = null;
 let editIndex = null;
 let pendingDeleteIdx = null;
 let loginMode = 'entrar';
+window.loginMode = loginMode;
 
 // ===== AUTH =====
 function mostrarLogin() {
@@ -1383,6 +1384,7 @@ async function logout() {
 // ===== LOGIN FORM =====
 function setLoginMode(mode) {
   loginMode = mode;
+  window.loginMode = mode;
   document.getElementById('btn-entrar').textContent = mode === 'entrar' ? 'Entrar' : 'Criar conta';
   document.getElementById('login-senha').placeholder = mode === 'entrar' ? 'Senha' : 'Crie uma senha (mín. 6 caracteres)';
   document.getElementById('login-toggle-label').textContent = mode === 'entrar' ? 'Não tem conta? ' : 'Já tem conta? ';
@@ -2234,16 +2236,22 @@ window.esconderLogin = esconderLogin;
     </div>
 
     <div class="login-toggle" id="login-toggle-text">
-      <span id="login-toggle-label">Não tem conta? </span><span id="login-toggle-btn" onclick="setLoginMode(loginMode === 'entrar' ? 'cadastrar' : 'entrar')">Cadastrar</span>
+      <span id="login-toggle-label">Não tem conta? </span><span id="login-toggle-btn" onclick="window.setLoginMode(window.loginMode === 'entrar' ? 'cadastrar' : 'entrar')">Cadastrar</span>
     </div>
   </div>
 </div>
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  // Desregistrar SWs antigos primeiro, depois registrar novo
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  }).then(() => {
     navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('SW registrado'))
+      .then(reg => {
+        reg.update();
+        console.log('SW registrado e atualizado');
+      })
       .catch(e => console.warn('SW falhou:', e));
   });
 }
