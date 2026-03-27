@@ -12,6 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -588,6 +589,206 @@
     .form-grid { grid-template-columns: 1fr; }
     .form-group.span2 { grid-column: span 1; }
   }
+
+  /* ===== LOGIN ===== */
+  #login-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,200,66,0.08) 0%, transparent 70%);
+  }
+  #login-screen.show { display: flex; }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+    margin: 16px;
+    animation: slideUp 0.3s ease;
+  }
+
+  .login-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .login-logo .icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #000;
+  }
+
+  .login-logo h2 { font-size: 20px; font-weight: 800; margin: 0; }
+  .login-logo p { font-size: 13px; color: var(--text2); margin: 0; }
+
+  .login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+  }
+
+  .login-divider::before,
+  .login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .login-divider span { font-size: 11px; color: var(--muted); }
+
+  .btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-google:hover { border-color: var(--gold); background: rgba(245,200,66,0.05); }
+
+  .login-form { display: flex; flex-direction: column; gap: 12px; }
+
+  .login-form input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .login-form input:focus { border-color: var(--gold); }
+
+  .btn-login {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #000;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,200,66,0.3); }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .login-toggle {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .login-toggle span {
+    color: var(--gold);
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .login-error {
+    background: rgba(255,77,109,0.1);
+    border: 1px solid rgba(255,77,109,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--red);
+    display: none;
+  }
+
+  /* Avatar no header */
+  .user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #000;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .user-menu {
+    display: none;
+    position: absolute;
+    top: 44px;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 200px;
+    z-index: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .user-menu.open { display: block; }
+
+  .user-menu-email {
+    font-size: 11px;
+    color: var(--text2);
+    padding: 6px 10px 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+    word-break: break-all;
+  }
+
+  .user-menu-item {
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .user-menu-item:hover { background: var(--surface2); color: var(--text); }
+  .user-menu-item.danger:hover { color: var(--red); }
 </style>
 </head>
 <body>
@@ -609,6 +810,13 @@
       <span id="cotacao-time" style="font-size:9px;color:var(--muted);"></span>
     </div>
     <button class="btn btn-gold" onclick="openModal()">+ Novo Produto</button>
+    <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu()">
+      <span id="user-initials">?</span>
+      <div class="user-menu" id="user-menu">
+        <div class="user-menu-email" id="user-menu-email">—</div>
+        <div class="user-menu-item" onclick="logout()">🚪 Sair da conta</div>
+      </div>
+    </div>
   </div>
 </header>
 <div id="loading-bar" style="display:none;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));animation:loadingAnim 1s infinite alternate;"></div>
@@ -1058,16 +1266,20 @@
 <div class="toast" id="toast"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ===== SUPABASE CONFIG =====
+// ===== SUPABASE AUTH + CONFIG =====
 const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
 
 async function supaFetch(method, path, body = null) {
+  const session = await supabase.auth.getSession();
+  const token = session?.data?.session?.access_token || SUPA_KEY;
   const opts = {
     method,
     headers: {
       'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
       'Prefer': method === 'POST' ? 'return=representation' : ''
     }
@@ -1086,6 +1298,134 @@ let cotacaoUSD = 0;
 let sellIndex = null;
 let editIndex = null;
 let pendingDeleteIdx = null;
+let loginMode = 'entrar';
+
+// ===== AUTH =====
+function mostrarLogin() {
+  document.getElementById('login-screen').classList.add('show');
+}
+
+function esconderLogin() {
+  document.getElementById('login-screen').classList.remove('show');
+}
+
+function setUserUI(user) {
+  currentUser = user;
+  const email = user.email || '';
+  const initials = email.substring(0, 2).toUpperCase();
+  document.getElementById('user-initials').textContent = initials;
+  document.getElementById('user-menu-email').textContent = email;
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-menu').classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  const avatar = document.getElementById('user-avatar');
+  if (avatar && !avatar.contains(e.target)) {
+    document.getElementById('user-menu').classList.remove('open');
+  }
+});
+
+async function logout() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  produtos = [];
+  renderAll();
+  mostrarLogin();
+  document.getElementById('user-menu').classList.remove('open');
+  showToast('Sessão encerrada.', 'info');
+}
+
+// ===== LOGIN FORM =====
+function setLoginMode(mode) {
+  loginMode = mode;
+  const btn = document.getElementById('btn-entrar');
+  const toggle = document.getElementById('login-toggle-btn');
+  const toggleText = document.getElementById('login-toggle-text');
+  const senhaEl = document.getElementById('login-senha');
+  if (mode === 'entrar') {
+    btn.textContent = 'Entrar';
+    toggle.textContent = 'Cadastrar';
+    toggleText.innerHTML = 'Não tem conta? <span id="login-toggle-btn" onclick="setLoginMode('cadastrar')">Cadastrar</span>';
+    senhaEl.placeholder = 'Senha';
+  } else {
+    btn.textContent = 'Criar conta';
+    toggleText.innerHTML = 'Já tem conta? <span id="login-toggle-btn" onclick="setLoginMode('entrar')">Entrar</span>';
+    senhaEl.placeholder = 'Crie uma senha (mín. 6 caracteres)';
+  }
+  document.getElementById('login-error').style.display = 'none';
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-google').addEventListener('click', async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+    if (error) showLoginError('Erro ao abrir login Google: ' + error.message);
+  });
+
+  document.getElementById('btn-entrar').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    if (!email || !senha) { showLoginError('Preencha e-mail e senha.'); return; }
+    const btn = document.getElementById('btn-entrar');
+    btn.disabled = true;
+    btn.textContent = 'Aguarde...';
+    document.getElementById('login-error').style.display = 'none';
+
+    let error;
+    if (loginMode === 'entrar') {
+      ({ error } = await supabase.auth.signInWithPassword({ email, password: senha }));
+    } else {
+      ({ error } = await supabase.auth.signUp({ email, password: senha }));
+      if (!error) {
+        showLoginError('Conta criada! Verifique seu e-mail para confirmar.');
+        btn.disabled = false;
+        btn.textContent = 'Criar conta';
+        return;
+      }
+    }
+
+    if (error) {
+      const msgs = {
+        'Invalid login credentials': 'E-mail ou senha incorretos.',
+        'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
+        'User already registered': 'E-mail já cadastrado. Faça login.',
+      };
+      showLoginError(msgs[error.message] || error.message);
+      btn.disabled = false;
+      btn.textContent = loginMode === 'entrar' ? 'Entrar' : 'Criar conta';
+    }
+  });
+
+  document.getElementById('login-senha').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btn-entrar').click();
+  });
+
+  // Escutar mudanças de auth
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      setUserUI(session.user);
+      esconderLogin();
+      mostrarLoading(true);
+      await fetchCotacao();
+      await carregarProdutos();
+      mostrarLoading(false);
+      setInterval(fetchCotacao, 60000);
+    } else {
+      mostrarLogin();
+    }
+  });
+});
 
 // ===== INIT =====
 async function init() {
@@ -1097,11 +1437,7 @@ async function init() {
   if (savedEmail) document.getElementById('api-email').value = savedEmail;
   const savedToken = localStorage.getItem('eldorado_jwt');
   if (savedToken) setAuthStatus(true, savedToken);
-  mostrarLoading(true);
-  await fetchCotacao();
-  await carregarProdutos();
-  mostrarLoading(false);
-  setInterval(fetchCotacao, 60000);
+  // Auth é gerenciada pelo onAuthStateChange
 }
 
 function mostrarLoading(show) {
@@ -1300,7 +1636,8 @@ async function salvarProduto() {
     liquido_usd: t.liquidoUSD,
     liquido_brl: t.liquidoBRL,
     cotacao_criacao: cotacaoUSD,
-    status: 'ativo'
+    status: 'ativo',
+    user_id: currentUser?.id
   };
 
   try {
@@ -1795,6 +2132,9 @@ function limparCalc() {
 
 // ===== EXPOR FUNÇÕES AO ESCOPO GLOBAL (fix iframe) =====
 window.openModal = openModal;
+window.logout = logout;
+window.toggleUserMenu = toggleUserMenu;
+window.setLoginMode = setLoginMode;
 window.confirmarDelete = confirmarDelete;
 window.cancelarDelete = cancelarDelete;
 window.closeModal = closeModal;
@@ -1824,6 +2164,40 @@ window.cancelarDelete = cancelarDelete;
 // Inicializar após DOM pronto
 document.addEventListener('DOMContentLoaded', init);
 </script>
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">E</div>
+      <h2>Eldorado Dashboard</h2>
+      <p>Entre na sua conta para continuar</p>
+    </div>
+
+    <button class="btn-google" id="btn-google">
+      <svg width="18" height="18" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Entrar com Google
+    </button>
+
+    <div class="login-divider"><span>ou</span></div>
+
+    <div class="login-form">
+      <div id="login-error" class="login-error"></div>
+      <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+      <input type="password" id="login-senha" placeholder="Senha" autocomplete="current-password">
+      <button class="btn-login" id="btn-entrar">Entrar</button>
+    </div>
+
+    <div class="login-toggle" id="login-toggle-text">
+      Não tem conta? <span id="login-toggle-btn">Cadastrar</span>
+    </div>
+  </div>
+</div>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
