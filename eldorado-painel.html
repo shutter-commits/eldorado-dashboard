@@ -478,53 +478,30 @@ select option { background:var(--surface); }
 /* ===== DESKTOP NAV ===== */
 #desktop-nav {
   display: none;
+  flex-direction: column;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 0 16px;
-  align-items: center;
-  justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
   backdrop-filter: blur(10px);
-  width: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
+  width: 100%; box-sizing: border-box;
+}
+.desktop-nav-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
 }
 .desktop-nav-logo {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 0; border-right: 1px solid var(--border); margin-right: 20px; padding-right: 20px;
 }
 .desktop-nav-logo .icon {
   width: 30px; height: 30px;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
   border-radius: 8px; display: flex; align-items: center;
-  justify-content: center; font-size: 14px; font-weight: 800; color: #000;
+  justify-content: center; font-size: 14px; font-weight: 800; color: #000; flex-shrink:0;
 }
 .desktop-nav-logo span { font-size: 14px; font-weight: 800; }
-.desktop-tabs {
-  display: flex; align-items: center; gap: 2px; flex: 1;
-  overflow-x: auto; overflow-y: hidden;
-  scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  min-width: 0;
-}
-.desktop-tabs::-webkit-scrollbar { display: none; }
-.desktop-tab {
-  padding: 9px 10px; border-radius: 8px; cursor: pointer;
-  font-size: 12px; font-weight: 600; color: var(--text2);
-  border: none; background: none; transition: all 0.15s;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-  flex-shrink: 0;
-}
-.desktop-tab:hover { background: var(--surface2); color: var(--text); }
-.desktop-tab.active { background: rgba(245,200,66,0.12); color: var(--gold); }
-.desktop-tab-badge {
-  background: var(--gold); color: #000; font-size: 9px; font-weight: 800;
-  padding: 1px 5px; border-radius: 10px; min-width: 16px; text-align: center;
-}
 .desktop-nav-right {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 0; border-left: 1px solid var(--border);
-  margin-left: 8px; padding-left: 12px;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
 }
 .desktop-cotacao {
   display: flex; align-items: center; gap: 6px;
@@ -539,12 +516,34 @@ select option { background:var(--surface); }
 }
 .desktop-user:hover { background: var(--surface2); }
 .desktop-user-avatar {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 800; color: #000;
+  font-size: 12px; font-weight: 800; color: #000;
 }
-.desktop-user-email { font-size: 12px; color: var(--text2); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.desktop-user-email { font-size: 12px; color: var(--text2); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Linha 2: tabs */
+.desktop-nav-tabs {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 16px; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  flex-wrap: wrap;
+}
+.desktop-nav-tabs::-webkit-scrollbar { display: none; }
+.desktop-tab {
+  padding: 7px 13px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  border: none; background: none; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  flex-shrink: 0;
+}
+.desktop-tab:hover { background: var(--surface2); color: var(--text); }
+.desktop-tab.active { background: rgba(245,200,66,0.12); color: var(--gold); }
+.desktop-tab-badge {
+  background: var(--gold); color: #000; font-size: 9px; font-weight: 800;
+  padding: 1px 5px; border-radius: 10px; min-width: 16px; text-align: center;
+}
 
 /* ===== DESKTOP SUMMARY ===== */
 #desktop-summary {
@@ -639,34 +638,38 @@ select option { background:var(--surface); }
 
   <!-- DESKTOP NAVBAR (só aparece >768px) -->
   <nav id="desktop-nav">
-    <div class="desktop-nav-logo">
-      <div class="icon">E</div>
-      <span>Eldorado <em style="color:var(--gold);font-style:normal;">Pro</em></span>
-    </div>
-    <div class="desktop-tabs">
-      <button class="desktop-tab active" onclick="navTo('compras',this)"><span>🛒</span> Compras <span class="desktop-tab-badge" id="dbadge-compras" style="display:none">0</span></button>
-      <button class="desktop-tab" onclick="navTo('ativos',this)"><span>📦</span> Ativos <span class="desktop-tab-badge" id="dbadge-ativos" style="display:none">0</span></button>
-      <button class="desktop-tab" onclick="navTo('vendidos',this)"><span>✅</span> Vendidos</button>
-      <button class="desktop-tab" onclick="navTo('lotes',this)"><span>🗃️</span> Lotes</button>
-      <button class="desktop-tab" onclick="navTo('carteira',this)"><span>💰</span> Carteira</button>
-      <button class="desktop-tab" onclick="navTo('graficos',this)"><span>📊</span> Gráficos</button>
-      <button class="desktop-tab" onclick="navTo('calculadora',this)"><span>🧮</span> Calculadora</button>
-      <button class="desktop-tab" onclick="navTo('configuracoes',this)"><span>⚙️</span> Config</button>
-    </div>
-    <div class="desktop-nav-right">
-      <div class="desktop-cotacao">
-        <div class="cotacao-dot"></div>
-        <span id="dcotacao-bid" style="font-weight:700;color:var(--text);">--</span>
-        <span id="dcotacao-var" style="font-size:10px;"></span>
+    <!-- Linha 1: Logo + Cotação + Usuário + Ação -->
+    <div class="desktop-nav-top">
+      <div class="desktop-nav-logo">
+        <div class="icon">E</div>
+        <span>Eldorado <em style="color:var(--gold);font-style:normal;">Pro</em></span>
       </div>
-      <div class="desktop-user" onclick="toggleDesktopUserMenu()">
-        <div class="desktop-user-avatar" id="desktop-initials">?</div>
-        <div class="desktop-user-email" id="desktop-email">—</div>
-        <div id="desktop-user-dropdown" style="display:none;position:absolute;top:44px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:160px;z-index:200;">
-          <div onclick="logout()" style="padding:9px 12px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--red);transition:background 0.15s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">🚪 Sair da conta</div>
+      <div class="desktop-nav-right">
+        <div class="desktop-cotacao">
+          <div class="cotacao-dot"></div>
+          <span id="dcotacao-bid" style="font-weight:700;color:var(--text);">--</span>
+          <span id="dcotacao-var" style="font-size:10px;"></span>
         </div>
+        <div class="desktop-user" onclick="toggleDesktopUserMenu()">
+          <div class="desktop-user-avatar" id="desktop-initials">?</div>
+          <div class="desktop-user-email" id="desktop-email">—</div>
+          <div id="desktop-user-dropdown" style="display:none;position:absolute;top:44px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:160px;z-index:200;">
+            <div onclick="logout()" style="padding:9px 12px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--red);transition:background 0.15s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">🚪 Sair da conta</div>
+          </div>
+        </div>
+        <button class="btn btn-gold btn-sm" id="desktop-action-btn" onclick="abrirModalCompra()" style="white-space:nowrap;">+ Nova Compra</button>
       </div>
-      <button class="btn btn-gold btn-sm" id="desktop-action-btn" onclick="abrirModalCompra()" style="white-space:nowrap;">+ Nova Compra</button>
+    </div>
+    <!-- Linha 2: Tabs de navegação -->
+    <div class="desktop-nav-tabs">
+      <button class="desktop-tab active" onclick="navTo('compras',this)">🛒 Compras <span class="desktop-tab-badge" id="dbadge-compras" style="display:none">0</span></button>
+      <button class="desktop-tab" onclick="navTo('ativos',this)">📦 Ativos <span class="desktop-tab-badge" id="dbadge-ativos" style="display:none">0</span></button>
+      <button class="desktop-tab" onclick="navTo('vendidos',this)">✅ Vendidos</button>
+      <button class="desktop-tab" onclick="navTo('lotes',this)">🗃️ Lotes</button>
+      <button class="desktop-tab" onclick="navTo('carteira',this)">💰 Carteira</button>
+      <button class="desktop-tab" onclick="navTo('graficos',this)">📊 Gráficos</button>
+      <button class="desktop-tab" onclick="navTo('calculadora',this)">🧮 Calculadora</button>
+      <button class="desktop-tab" onclick="navTo('configuracoes',this)">⚙️ Configurações</button>
     </div>
   </nav>
 
