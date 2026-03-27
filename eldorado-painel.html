@@ -589,6 +589,9 @@
 
   .sell-info-box strong { color: var(--text); }
 
+  /* Cards mobile — escondidos por padrão no desktop */
+  .mobile-cards { display: none; }
+
   /* ===== RESPONSIVIDADE ===== */
 
   /* Tela grande / Desktop wide (1400px+) */
@@ -627,6 +630,33 @@
 
   /* Mobile (600px) */
   @media (max-width: 600px) {
+    /* Cards mobile — esconder tabela, mostrar cards */
+    .table-wrap table { display: none; }
+    .mobile-cards { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+    .mobile-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .mc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .mc-nome { font-size: 14px; font-weight: 700; }
+    .mc-badge { font-size: 10px; }
+    .mc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .mc-item { display: flex; flex-direction: column; gap: 2px; }
+    .mc-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); }
+    .mc-value { font-size: 13px; font-family: var(--mono); font-weight: 600; }
+    .mc-actions { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
     /* Header */
     header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
     .logo h1 { font-size: 14px; }
@@ -1029,6 +1059,7 @@
         </tbody>
       </table>
     </div>
+    <div class="mobile-cards" id="mobile-cards-ativos"></div>
   </div>
 
   <!-- SEÇÃO: VENDIDOS -->
@@ -1080,6 +1111,7 @@
         </tbody>
       </table>
     </div>
+    <div class="mobile-cards" id="mobile-cards-vendidos"></div>
   </div>
 
   <!-- SEÇÃO: LOTES -->
@@ -1292,7 +1324,7 @@
     <div class="config-card">
       <h3>🔑 Integração com Eldorado.gg</h3>
       <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
-      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong>api@eldorado.gg</strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong><strong>api@eldorado.gg</strong></strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
 
       <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
         ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
@@ -2181,6 +2213,57 @@ function renderAtivos() {
   if (loteF === 'individual') ativos = ativos.filter(p => !p.loteId);
   else if (loteF) ativos = ativos.filter(p => p.loteId === loteF);
 
+  // Renderizar cards mobile
+  const mc = document.getElementById('mobile-cards-ativos');
+  if (mc) {
+    if (ativos.length === 0) {
+      mc.innerHTML = `<div class="empty-state" style="padding:40px;text-align:center;color:var(--text2);"><div style="font-size:36px">📦</div><p>Nenhum produto encontrado.</p></div>`;
+    } else {
+      const hoje = new Date();
+      mc.innerHTML = ativos.map(p => {
+        const diasPostado = Math.round((hoje - new Date(p.dataPostagem)) / (1000*60*60*24));
+        const lucroClass = (p.lucroEst||0) >= 0 ? 'var(--green)' : 'var(--red)';
+        const lote = lotes.find(l => l.id === p.loteId);
+        return `<div class="mobile-card">
+          <div class="mc-header">
+            <div>
+              <div class="mc-nome">${catIcon(p.categoria)} ${p.nome}</div>
+              ${lote ? `<span style="font-size:10px;color:var(--gold);">📦 ${lote.nome}</span>` : ''}
+            </div>
+            <span class="badge badge-pending mc-badge">⏳ Ativo</span>
+          </div>
+          <div class="mc-grid">
+            <div class="mc-item">
+              <span class="mc-label">Venda</span>
+              <span class="mc-value">$ ${(p.vendaUSD||0).toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Líquido</span>
+              <span class="mc-value" style="color:var(--blue)">R$ ${(p.liquidoBRL||0).toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Lucro est.</span>
+              <span class="mc-value" style="color:${lucroClass}">${(p.lucroEst||0)>=0?'+':''}R$ ${(p.lucroEst||0).toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Postado</span>
+              <span class="mc-value" style="font-size:11px">${fmtDate(p.dataPostagem)} · ${diasPostado}d</span>
+            </div>
+          </div>
+          <div class="mc-actions">
+            <button class="action-btn sell" data-sell="${p._i}">✓ Vender</button>
+            <button class="action-btn" data-edit="${p._i}">✏️</button>
+            <button class="action-btn del" data-del="${p._i}">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+      // Event listeners
+      mc.querySelectorAll('[data-sell]').forEach(b => b.addEventListener('click', () => openSellModal(parseInt(b.dataset.sell))));
+      mc.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openModal(parseInt(b.dataset.edit))));
+      mc.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => excluirProduto(parseInt(b.dataset.del))));
+    }
+  }
+
   const tb = document.getElementById('tbody-ativos');
   if (ativos.length === 0) {
     tb.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="icon">📦</div><p>Nenhum produto encontrado.</p></div></td></tr>`;
@@ -2239,6 +2322,55 @@ function renderVendidos() {
     const limite = new Date(); limite.setDate(limite.getDate() - periodoF);
     const limiteStr = limite.toISOString().split('T')[0];
     vendidos = vendidos.filter(p => p.dataVenda >= limiteStr);
+  }
+
+  // Renderizar cards mobile
+  const mcv = document.getElementById('mobile-cards-vendidos');
+  if (mcv) {
+    if (vendidos.length === 0) {
+      mcv.innerHTML = `<div class="empty-state" style="padding:40px;text-align:center;color:var(--text2);"><div style="font-size:36px">✅</div><p>Nenhuma venda encontrada.</p></div>`;
+    } else {
+      mcv.innerHTML = vendidos.map(p => {
+        const usdVendido = p.usdRecebido || p.receberUSD || 0;
+        const taxaPayPct = usdVendido * 0.04;
+        const aposPayoneer = usdVendido - taxaPayPct - 2;
+        const finalBRL = (aposPayoneer * (1 - 0.02)) * cotacaoUSD;
+        const lucroLiq = finalBRL - p.compra;
+        const lucroClass = lucroLiq >= 0 ? 'var(--green)' : 'var(--red)';
+        const lote = lotes.find(l => l.id === p.loteId);
+        return `<div class="mobile-card">
+          <div class="mc-header">
+            <div>
+              <div class="mc-nome">${catIcon(p.categoria)} ${p.nome}</div>
+              ${lote ? `<span style="font-size:10px;color:var(--gold);">📦 ${lote.nome}</span>` : ''}
+            </div>
+            <span class="badge badge-sold mc-badge">✅ Vendido</span>
+          </div>
+          <div class="mc-grid">
+            <div class="mc-item">
+              <span class="mc-label">Vendido por</span>
+              <span class="mc-value">$ ${(p.vendaUSD||0).toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Líquido final</span>
+              <span class="mc-value" style="color:var(--green)">R$ ${finalBRL.toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Lucro líq.</span>
+              <span class="mc-value" style="color:${lucroClass}">${lucroLiq>=0?'+':''}R$ ${lucroLiq.toFixed(2)}</span>
+            </div>
+            <div class="mc-item">
+              <span class="mc-label">Vendido em</span>
+              <span class="mc-value" style="font-size:11px">${fmtDate(p.dataVenda)} · ${p.diasParaVender??'--'}d</span>
+            </div>
+          </div>
+          <div class="mc-actions">
+            <button class="action-btn del" data-del="${p._i}">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+      mcv.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => excluirProduto(parseInt(b.dataset.del))));
+    }
   }
 
   const tb = document.getElementById('tbody-vendidos');
@@ -2900,6 +3032,7 @@ window.cancelarDelete = cancelarDelete;
 window.mostrarLogin = mostrarLogin;
 window.esconderLogin = esconderLogin;
 </script>
+
 
 <script>
 if ('serviceWorker' in navigator) {
