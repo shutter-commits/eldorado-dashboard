@@ -1333,7 +1333,7 @@
     <div class="config-card">
       <h3>🔑 Integração com Eldorado.gg</h3>
       <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
-      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong><strong><strong>api@eldorado.gg</strong></strong></strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong><strong><strong><strong><strong>api@eldorado.gg</strong></strong></strong></strong></strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
 
       <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
         ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
@@ -1569,7 +1569,7 @@
 </div>
 
 <!-- MODAL: DETALHES DO PRODUTO -->
-<div class="modal-overlay" id="modal-detalhes-overlay" onclick="if(event.target.id==='modal-detalhes-overlay')fecharDetalhes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;">
+<div class="modal-overlay" id="modal-detalhes-overlay" onclick="if(event.target.id==='modal-detalhes-overlay')fecharDetalhes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:8000;align-items:center;justify-content:center;">
   <div class="modal" style="max-width:480px;">
     <div class="modal-header">
       <div>
@@ -2332,7 +2332,7 @@ function renderAtivos() {
         return `<div class="mobile-card">
           <div class="mc-header">
             <div>
-              <div class="mc-nome">${catIcon(p.categoria)} ${p.nome}</div>
+              <div class="mc-nome" onclick="window.abrirDetalhes(${p._i})" style="cursor:pointer;">${catIcon(p.categoria)} ${p.nome} <span style="font-size:10px;color:var(--text2);">↗</span></div>
               ${lote ? `<span style="font-size:10px;color:var(--gold);">📦 ${lote.nome}</span>` : ''}
             </div>
             <span class="badge badge-pending mc-badge">⏳ Ativo</span>
@@ -2459,7 +2459,7 @@ function renderVendidos() {
         return `<div class="mobile-card">
           <div class="mc-header">
             <div>
-              <div class="mc-nome">${catIcon(p.categoria)} ${p.nome}</div>
+              <div class="mc-nome" onclick="window.abrirDetalhes(${p._i})" style="cursor:pointer;">${catIcon(p.categoria)} ${p.nome} <span style="font-size:10px;color:var(--text2);">↗</span></div>
               ${lote ? `<span style="font-size:10px;color:var(--gold);">📦 ${lote.nome}</span>` : ''}
             </div>
             <span class="badge badge-sold mc-badge">✅ Vendido</span>
@@ -3240,18 +3240,14 @@ window.cancelarDelete = cancelarDelete;
 window.mostrarLogin = mostrarLogin;
 window.esconderLogin = esconderLogin;
 </script>
-
-
-
-
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(reg => reg.unregister());
   }).then(() => {
     navigator.serviceWorker.register('./service-worker.js')
-      .then(reg => { reg.update(); console.log('SW ok'); })
-      .catch(e => console.warn('SW:', e));
+      .then(reg => reg.update())
+      .catch(e => console.warn(e));
   });
 }
 </script>
