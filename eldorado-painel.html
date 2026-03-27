@@ -411,6 +411,18 @@ select option { background:var(--surface); }
 .login-mode-toggle span { color:var(--gold); cursor:pointer; font-weight:600; }
 
 /* ===== RESPONSIVE ===== */
+/* ===== DESKTOP (>768px): topbar horizontal, sidebar oculta ===== */
+@media (min-width: 769px) {
+  #sidebar { display: none !important; }
+  #sidebar-overlay { display: none !important; }
+  #main { margin-left: 0 !important; }
+  #hamburger { display: none !important; }
+  #desktop-nav { display: flex !important; }
+  #desktop-summary { display: grid !important; }
+  #topbar { display: none !important; }
+}
+
+/* ===== MOBILE/TABLET (<768px): sidebar lateral ===== */
 @media (max-width: 768px) {
   #sidebar { transform:translateX(-100%); }
   #sidebar.open { transform:translateX(0); }
@@ -418,6 +430,8 @@ select option { background:var(--surface); }
   #main { margin-left:0; }
   #hamburger { display:block; }
   #content { padding:16px; }
+  #desktop-nav { display: none !important; }
+  #desktop-summary { display: none !important; }
   .summary-grid { grid-template-columns:1fr 1fr; gap:10px; }
   .carteira-grid { grid-template-columns:1fr; }
   .graficos-grid { grid-template-columns:1fr; }
@@ -433,13 +447,79 @@ select option { background:var(--surface); }
   .form-group.span2 { grid-column:span 1; }
   .modal { border-radius:16px 16px 0 0; max-width:100%; margin:0; }
   .modal-overlay { align-items:flex-end; }
-  #topbar { padding:12px 16px; }
   .page-title { font-size:15px; }
 }
 @media (max-width: 480px) {
   .summary-grid { grid-template-columns:1fr 1fr; }
   .card-value { font-size:18px; }
   .card-label { font-size:9px; }
+}
+
+/* ===== DESKTOP NAV ===== */
+#desktop-nav {
+  display: none;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.desktop-nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 0; border-right: 1px solid var(--border); margin-right: 20px; padding-right: 20px;
+}
+.desktop-nav-logo .icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 800; color: #000;
+}
+.desktop-nav-logo span { font-size: 14px; font-weight: 800; }
+.desktop-tabs { display: flex; align-items: center; gap: 2px; flex: 1; }
+.desktop-tab {
+  padding: 10px 14px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  border: none; background: none; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.desktop-tab:hover { background: var(--surface2); color: var(--text); }
+.desktop-tab.active { background: rgba(245,200,66,0.12); color: var(--gold); }
+.desktop-tab-badge {
+  background: var(--gold); color: #000; font-size: 9px; font-weight: 800;
+  padding: 1px 5px; border-radius: 10px; min-width: 16px; text-align: center;
+}
+.desktop-nav-right {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-left: 1px solid var(--border); margin-left: 12px; padding-left: 16px;
+}
+.desktop-cotacao {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 12px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px;
+}
+.desktop-user {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; padding: 6px 10px; border-radius: 8px;
+  transition: background 0.15s; position: relative;
+}
+.desktop-user:hover { background: var(--surface2); }
+.desktop-user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #000;
+}
+.desktop-user-email { font-size: 12px; color: var(--text2); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== DESKTOP SUMMARY ===== */
+#desktop-summary {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 20px 28px 0;
 }
 </style>
 </head>
@@ -512,15 +592,58 @@ select option { background:var(--surface); }
 <!-- MAIN -->
 <div id="main">
   <div id="loading-bar"></div>
+
+  <!-- MOBILE TOPBAR (só aparece <768px) -->
   <div id="topbar">
     <div style="display:flex;align-items:center;gap:12px;">
       <button id="hamburger" onclick="toggleSidebar()">☰</button>
       <div>
-        <div class="page-title" id="topbar-title">Compras</div>
-        <div class="page-sub" id="topbar-sub">Produtos adquiridos</div>
+        <div class="page-title" id="topbar-title">Dashboard</div>
+        <div class="page-sub" id="topbar-sub">Bem-vindo</div>
       </div>
     </div>
     <div id="topbar-actions"></div>
+  </div>
+
+  <!-- DESKTOP NAVBAR (só aparece >768px) -->
+  <nav id="desktop-nav">
+    <div class="desktop-nav-logo">
+      <div class="icon">E</div>
+      <span>Eldorado <em style="color:var(--gold);font-style:normal;">Pro</em></span>
+    </div>
+    <div class="desktop-tabs">
+      <button class="desktop-tab active" onclick="navTo('compras',this)"><span>🛒</span> Compras <span class="desktop-tab-badge" id="dbadge-compras" style="display:none">0</span></button>
+      <button class="desktop-tab" onclick="navTo('ativos',this)"><span>📦</span> Ativos <span class="desktop-tab-badge" id="dbadge-ativos" style="display:none">0</span></button>
+      <button class="desktop-tab" onclick="navTo('vendidos',this)"><span>✅</span> Vendidos</button>
+      <button class="desktop-tab" onclick="navTo('lotes',this)"><span>🗃️</span> Lotes</button>
+      <button class="desktop-tab" onclick="navTo('carteira',this)"><span>💰</span> Carteira</button>
+      <button class="desktop-tab" onclick="navTo('graficos',this)"><span>📊</span> Gráficos</button>
+      <button class="desktop-tab" onclick="navTo('calculadora',this)"><span>🧮</span> Calculadora</button>
+      <button class="desktop-tab" onclick="navTo('configuracoes',this)"><span>⚙️</span> Config</button>
+    </div>
+    <div class="desktop-nav-right">
+      <div class="desktop-cotacao">
+        <div class="cotacao-dot"></div>
+        <span id="dcotacao-bid" style="font-weight:700;color:var(--text);">--</span>
+        <span id="dcotacao-var" style="font-size:10px;"></span>
+      </div>
+      <div class="desktop-user" onclick="toggleDesktopUserMenu()">
+        <div class="desktop-user-avatar" id="desktop-initials">?</div>
+        <div class="desktop-user-email" id="desktop-email">—</div>
+        <div id="desktop-user-dropdown" style="display:none;position:absolute;top:44px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:160px;z-index:200;">
+          <div onclick="logout()" style="padding:9px 12px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--red);transition:background 0.15s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">🚪 Sair da conta</div>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-sm" id="desktop-action-btn" onclick="abrirModalCompra()" style="white-space:nowrap;">+ Nova Compra</button>
+    </div>
+  </nav>
+
+  <!-- DESKTOP SUMMARY CARDS (4 métricas) -->
+  <div id="desktop-summary">
+    <div class="summary-card gold"><div class="card-label">Total Investido</div><div class="card-value" id="ds-investido">R$ 0,00</div><div class="card-sub" id="ds-investido-sub">0 produtos</div></div>
+    <div class="summary-card green"><div class="card-label">Lucro Total</div><div class="card-value" id="ds-lucro">R$ 0,00</div><div class="card-sub" id="ds-lucro-sub">0 vendidos</div></div>
+    <div class="summary-card blue"><div class="card-label">A Receber (Est.)</div><div class="card-value" id="ds-receber">$ 0,00</div><div class="card-sub" id="ds-receber-sub">≈ R$ 0,00</div></div>
+    <div class="summary-card red"><div class="card-label">Prazo Médio</div><div class="card-value" id="ds-prazo">-- dias</div><div class="card-sub">tempo médio p/ vender</div></div>
   </div>
 
   <div id="content">
@@ -569,7 +692,7 @@ select option { background:var(--surface); }
       <div class="table-wrap">
         <table>
           <thead><tr>
-            <th>Produto</th><th>Categoria</th><th>Venda</th><th>Líquido</th><th>Lucro Est.</th><th>Postado</th><th>Status</th><th></th>
+            <th>Produto</th><th>Categoria</th><th>Preço de Venda</th><th>Líquido Final</th><th>Lucro Est.</th><th>Postado</th><th>Status</th><th></th>
           </tr></thead>
           <tbody id="tbody-ativos"></tbody>
         </table>
@@ -887,7 +1010,13 @@ select option { background:var(--surface); }
           <option value="entrada_nubank">Entrada manual Nubank</option>
         </select>
       </div>
-      <div class="form-group"><label>Valor (USD $)</label><input type="number" id="fm-usd" placeholder="0.00" step="0.01" oninput="calcMovPreview()"></div>
+      <div class="form-group">
+        <label>Valor (USD $)</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" id="fm-usd" placeholder="0.00" step="0.01" oninput="calcMovPreview()" style="flex:1;">
+          <button class="btn btn-ghost btn-sm" onclick="obterTudoCarteira()" title="Usar saldo total disponível" style="white-space:nowrap;padding:10px 10px;">Obter tudo</button>
+        </div>
+      </div>
       <div class="form-group"><label>Data</label><input type="date" id="fm-data"></div>
       <div class="form-group span2"><label>Descrição (opcional)</label><input type="text" id="fm-desc" placeholder="Ex: Saque mensal..."></div>
     </div>
@@ -1047,8 +1176,22 @@ function mostrarEntrar() {
 function setUserUI(user) {
   currentUser = user;
   const email = user.email || '';
-  document.getElementById('user-initials').textContent = email.substring(0,2).toUpperCase();
-  document.getElementById('user-email-sidebar').textContent = email;
+  const ini = email.substring(0,2).toUpperCase();
+  // Sidebar
+  const si = document.getElementById('user-initials');
+  const se = document.getElementById('user-email-sidebar');
+  if (si) si.textContent = ini;
+  if (se) se.textContent = email;
+  // Desktop nav
+  const di = document.getElementById('desktop-initials');
+  const de = document.getElementById('desktop-email');
+  if (di) di.textContent = ini;
+  if (de) de.textContent = email;
+}
+
+function toggleDesktopUserMenu() {
+  const d = document.getElementById('desktop-user-dropdown');
+  if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
 }
 
 function toggleUserMenu() {
@@ -1169,21 +1312,38 @@ const pageTitles = {
 function navTo(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.desktop-tab').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   if (el) el.classList.add('active');
   const t = pageTitles[page] || [page, ''];
   document.getElementById('topbar-title').textContent = t[0];
   document.getElementById('topbar-sub').textContent = t[1];
-  // Topbar actions
+
+  // Mobile topbar actions
   const actions = document.getElementById('topbar-actions');
-  actions.innerHTML = '';
-  if (page === 'compras') {
-    actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirModalCompra()">+ Nova Compra</button>';
-  } else if (page === 'lotes') {
-    actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirModalLote()">+ Novo Lote</button>';
-  } else if (page === 'carteira') {
-    actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirMovimentacao()">+ Registrar</button>';
+  if (actions) {
+    actions.innerHTML = '';
+    if (page === 'compras') actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirModalCompra()">+ Nova Compra</button>';
+    else if (page === 'lotes') actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirModalLote()">+ Novo Lote</button>';
+    else if (page === 'carteira') actions.innerHTML = '<button class="btn btn-gold btn-sm" onclick="abrirMovimentacao()">+ Registrar</button>';
   }
+
+  // Desktop action button
+  const dab = document.getElementById('desktop-action-btn');
+  if (dab) {
+    const actionMap = { compras:['+ Nova Compra','abrirModalCompra()'], lotes:['+ Novo Lote','abrirModalLote()'], carteira:['+ Registrar','abrirMovimentacao()'] };
+    const a = actionMap[page];
+    if (a) { dab.textContent=a[0]; dab.setAttribute('onclick',a[1]); dab.style.display=''; }
+    else dab.style.display='none';
+  }
+
+  // Mostrar/esconder summary desktop
+  const ds = document.getElementById('desktop-summary');
+  if (ds) {
+    const pagesComSummary = ['compras','ativos','vendidos','lotes'];
+    ds.style.display = pagesComSummary.includes(page) ? 'grid' : 'none';
+  }
+
   if (page === 'graficos') setTimeout(renderGraficos, 50);
   closeSidebar();
 }
@@ -1233,11 +1393,21 @@ async function fetchCotacao() {
     const c = d.USDBRL;
     cotacaoUSD = parseFloat(c.bid);
     const v = parseFloat(c.pctChange);
-    document.getElementById('cotacao-bid').textContent = `R$ ${cotacaoUSD.toFixed(4)}`;
-    const el = document.getElementById('cotacao-var');
-    el.textContent = `${v>=0?'+':''}${v.toFixed(2)}%`;
-    el.style.color = v>=0?'var(--green)':'var(--red)';
-    document.getElementById('cotacao-hl').textContent = `↑${parseFloat(c.high).toFixed(2)} ↓${parseFloat(c.low).toFixed(2)}`;
+    const bidStr = `R$ ${cotacaoUSD.toFixed(4)}`;
+    const varStr = `${v>=0?'+':''}${v.toFixed(2)}%`;
+    const varColor = v>=0?'var(--green)':'var(--red)';
+    // Sidebar
+    const cb = document.getElementById('cotacao-bid');
+    const cv = document.getElementById('cotacao-var');
+    const ch = document.getElementById('cotacao-hl');
+    if (cb) cb.textContent = bidStr;
+    if (cv) { cv.textContent = varStr; cv.style.color = varColor; }
+    if (ch) ch.textContent = `↑${parseFloat(c.high).toFixed(2)} ↓${parseFloat(c.low).toFixed(2)}`;
+    // Desktop
+    const dcb = document.getElementById('dcotacao-bid');
+    const dcv = document.getElementById('dcotacao-var');
+    if (dcb) dcb.textContent = bidStr;
+    if (dcv) { dcv.textContent = varStr; dcv.style.color = varColor; }
   } catch(e) { cotacaoUSD = 5.75; document.getElementById('cotacao-bid').textContent = `R$ ${cotacaoUSD.toFixed(2)}`; }
 }
 
@@ -1317,12 +1487,37 @@ function renderAll() {
 function renderSummaryBadges() {
   const comprasCount = produtos.filter(p => p.statusCompra === 'em_estoque').length;
   const ativosCount = produtos.filter(p => p.status === 'ativo').length;
+  // Sidebar badges
   const bc = document.getElementById('badge-compras');
   const ba = document.getElementById('badge-ativos');
-  bc.style.display = comprasCount > 0 ? 'block' : 'none';
-  bc.textContent = comprasCount;
-  ba.style.display = ativosCount > 0 ? 'block' : 'none';
-  ba.textContent = ativosCount;
+  if (bc) { bc.style.display = comprasCount > 0 ? 'block' : 'none'; bc.textContent = comprasCount; }
+  if (ba) { ba.style.display = ativosCount > 0 ? 'block' : 'none'; ba.textContent = ativosCount; }
+  // Desktop badges
+  const dbc = document.getElementById('dbadge-compras');
+  const dba = document.getElementById('dbadge-ativos');
+  if (dbc) { dbc.style.display = comprasCount > 0 ? 'inline-block' : 'none'; dbc.textContent = comprasCount; }
+  if (dba) { dba.style.display = ativosCount > 0 ? 'inline-block' : 'none'; dba.textContent = ativosCount; }
+
+  // Desktop summary cards
+  const vendidos = produtos.filter(p => p.status === 'vendido');
+  const ativos = produtos.filter(p => p.status === 'ativo');
+  const compras = produtos.filter(p => p.statusCompra === 'em_estoque');
+  const totalInvest = produtos.reduce((a,p) => a + (p.compra||0), 0);
+  const totalLucro = vendidos.reduce((a,p) => a + (p.lucroReal||0), 0);
+  const totalReceberUSD = ativos.reduce((a,p) => a + (p.vendaUSD||0), 0);
+  const dias = vendidos.filter(p=>p.diasParaVender!=null).map(p=>p.diasParaVender);
+  const prazoMedio = dias.length ? Math.round(dias.reduce((a,b)=>a+b,0)/dias.length) : 0;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('ds-investido', `R$ ${totalInvest.toFixed(2)}`);
+  set('ds-investido-sub', `${comprasCount + ativosCount} em estoque/ativos`);
+  set('ds-lucro', `${totalLucro>=0?'+':''}R$ ${totalLucro.toFixed(2)}`);
+  set('ds-lucro-sub', `${vendidos.length} vendido(s)`);
+  set('ds-receber', `$ ${totalReceberUSD.toFixed(2)}`);
+  set('ds-receber-sub', `≈ R$ ${(totalReceberUSD*cotacaoUSD).toFixed(2)}`);
+  set('ds-prazo', prazoMedio > 0 ? `${prazoMedio} dias` : '-- dias');
+  // Colorir lucro
+  const lucroEl = document.getElementById('ds-lucro');
+  if (lucroEl) lucroEl.style.color = totalLucro >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
 // ===== RENDER COMPRAS =====
@@ -1644,6 +1839,27 @@ function abrirMovimentacao() {
   document.getElementById('modal-mov-overlay').classList.add('open');
 }
 function fecharMovimentacao() { document.getElementById('modal-mov-overlay').classList.remove('open'); }
+
+function obterTudoCarteira() {
+  const tipo = document.getElementById('fm-tipo').value;
+  // Recalcular saldos atuais
+  const vendas = produtos.filter(p => p.status === 'vendido');
+  const totalVendasUSD = vendas.reduce((a,p) => a + (calcTaxas(p.vendaUSD||0,0).creditoPayoneer), 0);
+  const saquesEld = carteira.filter(m => m.tipo === 'saque_eldorado').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
+  const transfPay = carteira.filter(m => m.tipo === 'transferencia_nubank').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
+  const saldoEld = Math.max(0, totalVendasUSD - saquesEld);
+  const saldoPay = Math.max(0, saquesEld - transfPay);
+
+  let valor = 0;
+  if (tipo === 'saque_eldorado') valor = saldoEld;
+  else if (tipo === 'transferencia_nubank') valor = saldoPay;
+  else valor = 0;
+
+  if (valor <= 0) { showToast('Saldo insuficiente ou zero.', 'info'); return; }
+  document.getElementById('fm-usd').value = valor.toFixed(2);
+  calcMovPreview();
+  showToast(`Valor preenchido: $ ${valor.toFixed(2)}`, 'info');
+}
 
 function calcMovPreview() {
   const tipo = document.getElementById('fm-tipo').value;
@@ -2221,6 +2437,7 @@ window.navTo = navTo;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 window.toggleUserMenu = toggleUserMenu;
+window.toggleDesktopUserMenu = toggleDesktopUserMenu;
 window.logout = logout;
 window.mostrarCadastro = mostrarCadastro;
 window.mostrarEntrar = mostrarEntrar;
@@ -2244,6 +2461,7 @@ window.abrirMovimentacao = abrirMovimentacao;
 window.fecharMovimentacao = fecharMovimentacao;
 window.calcMovPreview = calcMovPreview;
 window.toggleMovCampos = toggleMovCampos;
+window.obterTudoCarteira = obterTudoCarteira;
 window.salvarMovimentacao = salvarMovimentacao;
 window.deletarMovimentacao = deletarMovimentacao;
 window.abrirSimulador = abrirSimulador;
