@@ -972,7 +972,13 @@ select option { background:var(--surface); }
     <div class="form-grid">
       <div class="form-group span2"><label>Nome do Produto</label><input type="text" id="fc-nome" placeholder="Ex: Karambit FN, Conta Prime CS2..."></div>
       <div class="form-group"><label>Categoria</label>
-        <select id="fc-cat"><option value="conta">Conta</option><option value="skin">Skin / Item</option><option value="moeda">Moeda</option><option value="outro">Outro</option></select>
+        <select id="fc-cat" onchange="toggleSABFields()">
+          <option value="conta">Conta</option>
+          <option value="skin">Skin / Item</option>
+          <option value="moeda">Moeda</option>
+          <option value="sab">🧠 Steal a Brainrot</option>
+          <option value="outro">Outro</option>
+        </select>
       </div>
       <div class="form-group"><label>Data da Compra</label><input type="date" id="fc-data"></div>
       <div class="form-group" id="fg-custo"><label>Custo (R$)</label><input type="number" id="fc-custo" placeholder="0.00" step="0.01"></div>
@@ -980,6 +986,72 @@ select option { background:var(--surface); }
         <select id="fc-lote" onchange="toggleCustoLote()"><option value="">— Individual —</option></select>
       </div>
       <div class="form-group span2"><label>Observações</label><input type="text" id="fc-obs" placeholder="Detalhes adicionais..."></div>
+    </div>
+
+    <!-- CAMPOS STEAL A BRAINROT -->
+    <div id="sab-fields" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;">🧠 Steal a Brainrot</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>M/S</label>
+          <select id="fc-ms">
+            <option value="">Selecione...</option>
+            <option value="0">M/S: 0</option>
+            <option value="0-24">0-24 M/s</option>
+            <option value="25-49">25-49 M/s</option>
+            <option value="50-99">50-99 M/s</option>
+            <option value="100-249">100-249 M/s</option>
+            <option value="250-499">250-499 M/s</option>
+            <option value="500-749">500-749 M/s</option>
+            <option value="750-999">750-999 M/s</option>
+            <option value="1B+">1+ B/s</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mutation</label>
+          <select id="fc-mutation">
+            <option value="">Nenhum</option>
+            <option value="Divine">Divine</option>
+            <option value="Cursed">Cursed</option>
+            <option value="Gold">Gold</option>
+            <option value="Diamond">Diamond</option>
+            <option value="Bloodrot">Bloodrot</option>
+            <option value="Candy">Candy</option>
+            <option value="Lava">Lava</option>
+            <option value="Galaxy">Galaxy</option>
+            <option value="Yin-Yang">Yin-Yang</option>
+            <option value="Radioactive">Radioactive</option>
+            <option value="Rainbow">Rainbow</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Item</label>
+          <select id="fc-tipo-item" onchange="toggleBrainrotFields()">
+            <option value="">Selecione...</option>
+            <option value="Brainrot">Brainrot</option>
+            <option value="Pacote">Pacote</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group" id="fg-raridade" style="display:none;">
+          <label>Raridade</label>
+          <select id="fc-raridade" onchange="toggleBrainrotNome()">
+            <option value="">Selecione...</option>
+            <option value="Common">Common</option>
+            <option value="Rare">Rare</option>
+            <option value="Epic">Epic</option>
+            <option value="Legendary">Legendary</option>
+            <option value="Mythical">Mythical</option>
+            <option value="Brainrot God">Brainrot God</option>
+            <option value="Secret">Secret</option>
+            <option value="OG">OG</option>
+          </select>
+        </div>
+        <div class="form-group span2" id="fg-brainrot-nome" style="display:none;">
+          <label>Nome do Brainrot</label>
+          <input type="text" id="fc-brainrot-nome" placeholder="Ex: Tralalero Tralala...">
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="fecharModalCompra()">Cancelar</button>
@@ -1409,7 +1481,14 @@ function closeSidebar() {
 // ===== UTILS =====
 function hoje() { return new Date().toISOString().split('T')[0]; }
 function fmtDate(d) { if (!d) return '--'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
-function catIcon(c) { return {conta:'👤',skin:'🎨',moeda:'💰',outro:'📦'}[c]||'📦'; }
+function catIcon(c) { return {conta:'👤',skin:'🎨',moeda:'💰',sab:'🧠',outro:'📦'}[c]||'📦'; }
+function rarColor(r) {
+  return {
+    'Common':'#6b7280','Rare':'#3b82f6','Epic':'#8b5cf6',
+    'Legendary':'#f59e0b','Mythical':'#ef4444','Brainrot God':'#f5c842',
+    'Secret':'#ec4899','OG':'#10b981'
+  }[r]||'#6b7280';
+}
 function mostrarLoading(s) { const el = document.getElementById('loading-bar'); if(el) el.style.display = s?'block':'none'; }
 function showToast(msg, type='info') {
   const t = document.getElementById('toast');
@@ -1481,6 +1560,8 @@ async function carregarProdutos() {
       brlRecebido:parseFloat(p.brl_recebido)||0, lucroReal:parseFloat(p.lucro_real)||0,
       diasParaVender:p.dias_para_vender, cotacaoNaCriacao:parseFloat(p.cotacao_criacao)||0,
       status:p.status||'ativo', statusCompra:p.status_compra||'em_estoque', obs:p.obs||'',
+      ms:p.ms||'', mutation:p.mutation||'', tipoItem:p.tipo_item||'',
+      raridade:p.raridade||'', brainrotNome:p.brainrot_nome||'',
     }));
   } catch(e) { console.error('carregarProdutos:', e.message); }
 }
@@ -1592,8 +1673,16 @@ function renderCompras() {
         ${lote?`<div class="td-sub">📦 ${lote.nome}</div>`:''}
         ${p.obs?`<div class="td-sub">${p.obs}</div>`:''}
       </td>
-      <td><span style="font-size:15px;">${catIcon(p.categoria)}</span><div class="td-sub">${p.categoria}</div></td>
-      <td><div class="mono" style="font-weight:700;">R$ ${p.compra.toFixed(2)}</div></td>
+      <td>
+        <span style="font-size:15px;">${catIcon(p.categoria)}</span>
+        <div class="td-sub">${p.categoria === 'sab' ? '🧠 SAB' : p.categoria}</div>
+        ${p.categoria === 'sab' && p.raridade ? `<div style="margin-top:3px;"><span style="font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;background:${rarColor(p.raridade)};color:#fff;">${p.raridade}</span></div>` : ''}
+      </td>
+      <td>
+        <div class="mono" style="font-weight:700;">R$ ${p.compra.toFixed(2)}</div>
+        ${p.categoria === 'sab' && p.ms ? `<div class="td-sub">⚡ ${p.ms}</div>` : ''}
+        ${p.categoria === 'sab' && p.mutation && p.mutation !== '' ? `<div class="td-sub">✨ ${p.mutation}</div>` : ''}
+      </td>
       <td>${lote?`<span class="badge badge-estoque">📦 ${lote.nome}</span>`:'<span style="font-size:11px;color:var(--text2);">Individual</span>'}</td>
       <td><span class="badge badge-estoque">📦 Em estoque</span></td>
       <td><div class="action-btns">
@@ -1659,7 +1748,11 @@ function renderAtivos() {
         <div class="nome-link" onclick="window.abrirDetalhes(${p._i})">${p.nome} <span style="font-size:10px;color:var(--text2);">↗</span></div>
         ${lote?`<div class="td-sub">📦 ${lote.nome}</div>`:''}
       </td>
-      <td><span style="font-size:15px;">${catIcon(p.categoria)}</span></td>
+      <td>
+        <span style="font-size:15px;">${catIcon(p.categoria)}</span>
+        ${p.categoria === 'sab' && p.raridade ? `<div style="margin-top:3px;"><span style="font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;background:${rarColor(p.raridade)};color:#fff;">${p.raridade}</span></div>` : ''}
+        ${p.categoria === 'sab' && p.ms ? `<div class="td-sub">⚡ ${p.ms}</div>` : ''}
+      </td>
       <td><div class="mono" style="font-weight:700;">$ ${(p.vendaUSD||0).toFixed(2)}</div><div class="td-sub">≈ R$ ${((p.vendaUSD||0)*cotacaoUSD).toFixed(2)}</div></td>
       <td><div class="mono" style="font-weight:700;color:var(--blue);">R$ ${t.liquidoBRL.toFixed(2)}</div><div class="td-sub">após taxas</div></td>
       <td><div class="mono" style="font-weight:700;color:${lc};">${t.lucroLiq>=0?'+':''}R$ ${t.lucroLiq.toFixed(2)}</div></td>
@@ -2026,6 +2119,12 @@ function abrirModalCompra(idx = null) {
     document.getElementById('fc-custo').value = p.compra||'';
     document.getElementById('fc-lote').value = p.loteId||'';
     document.getElementById('fc-obs').value = p.obs||'';
+    // SAB fields
+    document.getElementById('fc-ms').value = p.ms||'';
+    document.getElementById('fc-mutation').value = p.mutation||'';
+    document.getElementById('fc-tipo-item').value = p.tipoItem||'';
+    document.getElementById('fc-raridade').value = p.raridade||'';
+    document.getElementById('fc-brainrot-nome').value = p.brainrotNome||'';
   } else {
     document.getElementById('fc-nome').value = '';
     document.getElementById('fc-cat').value = 'conta';
@@ -2033,14 +2132,56 @@ function abrirModalCompra(idx = null) {
     document.getElementById('fc-custo').value = '';
     document.getElementById('fc-lote').value = '';
     document.getElementById('fc-obs').value = '';
+    document.getElementById('fc-ms').value = '';
+    document.getElementById('fc-mutation').value = '';
+    document.getElementById('fc-tipo-item').value = '';
+    document.getElementById('fc-raridade').value = '';
+    document.getElementById('fc-brainrot-nome').value = '';
   }
   toggleCustoLote();
+  toggleSABFields();
+  toggleBrainrotFields();
+  toggleBrainrotNome();
   document.getElementById('modal-compra-overlay').classList.add('open');
 }
 function fecharModalCompra() {
   document.getElementById('modal-compra-overlay').classList.remove('open');
   editCompraIdx = null;
 }
+function toggleSABFields() {
+  const cat = document.getElementById('fc-cat').value;
+  const sabFields = document.getElementById('sab-fields');
+  if (sabFields) sabFields.style.display = cat === 'sab' ? 'block' : 'none';
+  if (cat !== 'sab') {
+    // Limpar campos SAB ao trocar categoria
+    ['fc-ms','fc-mutation','fc-tipo-item','fc-raridade','fc-brainrot-nome'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    toggleBrainrotFields();
+    toggleBrainrotNome();
+  }
+}
+
+function toggleBrainrotFields() {
+  const tipo = document.getElementById('fc-tipo-item')?.value;
+  const fgRar = document.getElementById('fg-raridade');
+  if (fgRar) fgRar.style.display = tipo === 'Brainrot' ? 'flex' : 'none';
+  if (fgRar) fgRar.style.flexDirection = 'column';
+  if (tipo !== 'Brainrot') {
+    const el = document.getElementById('fc-raridade');
+    if (el) el.value = '';
+    toggleBrainrotNome();
+  }
+}
+
+function toggleBrainrotNome() {
+  const rar = document.getElementById('fc-raridade')?.value;
+  const fgNome = document.getElementById('fg-brainrot-nome');
+  if (fgNome) fgNome.style.display = rar ? 'flex' : 'none';
+  if (fgNome) fgNome.style.flexDirection = 'column';
+}
+
 function toggleCustoLote() {
   const loteId = document.getElementById('fc-lote').value;
   const fg = document.getElementById('fg-custo');
@@ -2057,10 +2198,22 @@ async function salvarCompra() {
   const compra = loteId ? 0 : (parseFloat(document.getElementById('fc-custo').value)||0);
   const obs = document.getElementById('fc-obs').value.trim();
   if (!nome) { showToast('Preencha o nome!', 'error'); return; }
+  // Campos SAB
+  const ms = document.getElementById('fc-ms')?.value||null;
+  const mutation = document.getElementById('fc-mutation')?.value||null;
+  const tipoItem = document.getElementById('fc-tipo-item')?.value||null;
+  const raridade = document.getElementById('fc-raridade')?.value||null;
+  const brainrotNome = document.getElementById('fc-brainrot-nome')?.value.trim()||null;
+
   const row = {
     nome, categoria, obs, data_postagem: data,
     compra, lote_id: loteId, venda_usd: 0,
     status: 'ativo', status_compra: 'em_estoque',
+    ms: categoria === 'sab' ? ms : null,
+    mutation: categoria === 'sab' ? mutation : null,
+    tipo_item: categoria === 'sab' ? tipoItem : null,
+    raridade: categoria === 'sab' ? raridade : null,
+    brainrot_nome: categoria === 'sab' ? brainrotNome : null,
     user_id: currentUser?.id
   };
   try {
@@ -2258,6 +2411,11 @@ function abrirDetalhes(idx) {
   document.getElementById('det-badges').innerHTML = `
     <span class="badge ${p.status==='vendido'?'badge-vendido':'badge-ativo'}">${p.status==='vendido'?'✅ Vendido':'⏳ Ativo'}</span>
     ${lote?`<span class="badge badge-estoque">📦 ${lote.nome}</span>`:''}
+    ${p.categoria==='sab'&&p.raridade?`<span class="badge" style="background:${rarColor(p.raridade)};color:#fff;border:none;">${p.raridade}</span>`:''}
+    ${p.categoria==='sab'&&p.mutation?`<span class="badge" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);">✨ ${p.mutation}</span>`:''}
+    ${p.categoria==='sab'&&p.ms?`<span class="badge" style="background:rgba(77,159,255,0.15);color:var(--blue);border:1px solid rgba(77,159,255,0.3);">⚡ ${p.ms}</span>`:''}
+    ${p.categoria==='sab'&&p.tipoItem?`<span class="badge badge-estoque">${p.tipoItem}</span>`:''}
+    ${p.categoria==='sab'&&p.brainrotNome?`<span class="badge" style="background:rgba(245,200,66,0.1);color:var(--gold);border:1px solid rgba(245,200,66,0.3);">🧠 ${p.brainrotNome}</span>`:''}
   `;
   document.getElementById('det-venda-usd').textContent = `$ ${(p.vendaUSD||0).toFixed(2)}`;
   document.getElementById('det-venda-brl').textContent = brl(p.vendaUSD||0);
@@ -2494,6 +2652,9 @@ window.abrirModalCompra = abrirModalCompra;
 window.fecharModalCompra = fecharModalCompra;
 window.salvarCompra = salvarCompra;
 window.toggleCustoLote = toggleCustoLote;
+window.toggleSABFields = toggleSABFields;
+window.toggleBrainrotFields = toggleBrainrotFields;
+window.toggleBrainrotNome = toggleBrainrotNome;
 window.abrirModalPostar = abrirModalPostar;
 window.fecharModalPostar = fecharModalPostar;
 window.syncPostarBRL = syncPostarBRL;
