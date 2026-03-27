@@ -301,13 +301,14 @@
   }
 
   thead th {
-    padding: 12px 16px;
+    padding: 14px 20px;
     text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--text2);
+    white-space: nowrap;
   }
 
   tbody tr {
@@ -316,15 +317,20 @@
   }
 
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface2); }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
 
   tbody td {
-    padding: 14px 16px;
+    padding: 16px 20px;
     font-size: 13px;
     vertical-align: middle;
+    line-height: 1.5;
   }
 
-  .mono { font-family: var(--mono); font-size: 12px; }
+  .mono { font-family: var(--mono); font-size: 13px; }
+  
+  .td-nome { min-width: 160px; }
+  .td-valor { min-width: 110px; }
+  .td-data { white-space: nowrap; min-width: 90px; }
 
   .badge {
     display: inline-flex;
@@ -1043,13 +1049,10 @@
           <tr>
             <th>Produto</th>
             <th>Categoria</th>
-            <th>Comprei</th>
-            <th>Venda (USD)</th>
-            <th>Taxa Eldorado</th>
-            <th>Receberei</th>
+            <th>Venda</th>
+            <th>Líquido (após taxas)</th>
             <th>Lucro Est.</th>
             <th>Postado</th>
-            <th>Prazo</th>
             <th>Status</th>
             <th></th>
           </tr>
@@ -1094,12 +1097,9 @@
           <tr>
             <th>Produto</th>
             <th>Categoria</th>
-            <th>Comprei</th>
-            <th>Venda (USD)</th>
-            <th>Taxas (Eld+Pay+Transf)</th>
-            <th>Bruto Eldorado</th>
+            <th>Venda</th>
             <th>Líquido Final</th>
-            <th>Lucro Real Líq.</th>
+            <th>Lucro Líq.</th>
             <th>Postado</th>
             <th>Vendido em</th>
             <th>Dias</th>
@@ -1324,7 +1324,7 @@
     <div class="config-card">
       <h3>🔑 Integração com Eldorado.gg</h3>
       <p>A Eldorado usa autenticação via <strong>AWS Cognito</strong> — não há uma API Key fixa. Você se autentica com seu e-mail e senha da conta Eldorado.<br><br>
-      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong><strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d8b9a8b198bdb4bcb7aab9bcb7f6bfbf">[email&#160;protected]</a></strong></strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
+      ⚠️ <strong>Pré-requisito:</strong> você precisa primeiro enviar um e-mail para <strong><strong><strong><strong><strong>api@eldorado.gg</strong></strong></strong></strong></strong> pedindo autorização de acesso à API. Após aprovação, use suas credenciais abaixo.</p>
 
       <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--text2);">
         ℹ️ Suas credenciais ficam salvas <strong>apenas localmente</strong> no seu navegador (localStorage). Nada é enviado a servidores externos além da própria Eldorado.
@@ -1596,7 +1596,7 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ===== SUPABASE AUTH + CONFIG =====
 const SUPA_URL = 'https://ftizggxqkfyloyblpbfj.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0aXpnZ3hxa2Z5bG95YmxwYmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NzQzMjcsImV4cCI6MjA5MDE1MDMyN30.l3oLGc0A3_qQDRE5AIIuSYQjo56QbPyecFjhgDoGzTQ';
@@ -2276,20 +2276,33 @@ function renderAtivos() {
     const lucroClass = p.lucroEst >= 0 ? 'lucro-positive' : 'lucro-negative';
     const lucroPfx = p.lucroEst >= 0 ? '+' : '';
     const diasPostado = Math.round((hoje - new Date(p.dataPostagem)) / (1000*60*60*24));
+    const loteNome = p.loteId ? lotes.find(l=>l.id===p.loteId)?.nome : null;
     return `<tr>
-      <td>
-        <strong>${p.nome}</strong>
-        ${p.loteId ? `<br><span style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 7px;color:var(--gold);font-family:var(--mono);">📦 ${lotes.find(l=>l.id===p.loteId)?.nome||'Lote'}</span>` : ''}
-        ${p.obs ? `<br><span style="color:var(--text2);font-size:11px;">${p.obs}</span>` : ''}
+      <td class="td-nome">
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px;">${p.nome}</div>
+        ${loteNome ? `<span style="font-size:10px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.3);border-radius:10px;padding:2px 8px;color:var(--gold);">📦 ${loteNome}</span>` : ''}
+        ${p.obs ? `<div style="color:var(--text2);font-size:11px;margin-top:2px;">${p.obs}</div>` : ''}
       </td>
-      <td>${catIcon(p.categoria)} ${p.categoria}</td>
-      <td class="mono">R$ ${p.compra.toFixed(2)}</td>
-      <td class="mono">$ ${p.vendaUSD.toFixed(2)}</td>
-      <td class="mono" style="color:var(--red);font-size:11px;">Eld: -$${p.taxaUSD.toFixed(2)}<br>Pay+Transf: ~-$${((p.receberUSD*0.04)+2+(p.receberUSD*0.96*0.02)).toFixed(2)}</td>
-      <td class="mono" style="color:var(--blue)">$ ${p.receberUSD.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">Eldorado bruto</span></td>
-      <td class="${lucroClass}">${lucroPfx}R$ ${p.lucroEst.toFixed(2)}<br><span style="color:var(--text2);font-size:10px;">líquido final</span></td>
-      <td class="mono">${fmtDate(p.dataPostagem)}</td>
-      <td class="mono">${diasPostado}d postado</td>
+      <td>
+        <span style="font-size:16px;">${catIcon(p.categoria)}</span>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${p.categoria}</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;">$ ${p.vendaUSD.toFixed(2)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">≈ R$ ${(p.vendaUSD*cotacaoUSD).toFixed(2)}</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--blue);">R$ ${(p.liquidoBRL||0).toFixed(2)}</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:2px;">após todas taxas</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;" class="${lucroClass}">${lucroPfx}R$ ${(p.lucroEst||0).toFixed(2)}</div>
+        ${p.compra > 0 ? `<div style="font-size:10px;color:var(--text2);margin-top:2px;">invest. R$ ${p.compra.toFixed(2)}</div>` : ''}
+      </td>
+      <td class="td-data">
+        <div style="font-family:var(--mono);font-size:13px;">${fmtDate(p.dataPostagem)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${diasPostado}d atrás</div>
+      </td>
       <td><span class="badge badge-pending">⏳ Ativo</span></td>
       <td><div class="action-btns">
         <button class="action-btn sell" title="Marcar como vendido" data-sell="${p._i}">✓</button>
@@ -2394,22 +2407,38 @@ function renderVendidos() {
     const lucroRealLiq = finalBRL - p.compra;
     const lucroLiqClass = lucroRealLiq >= 0 ? 'lucro-positive' : 'lucro-negative';
     const lucroLiqPfx = lucroRealLiq >= 0 ? '+' : '';
+    const loteNomeV = p.loteId ? lotes.find(l=>l.id===p.loteId)?.nome : null;
     return `<tr>
-      <td><strong>${p.nome}</strong></td>
-      <td>${catIcon(p.categoria)} ${p.categoria}</td>
-      <td class="mono">R$ ${p.compra.toFixed(2)}</td>
-      <td class="mono">$ ${p.vendaUSD.toFixed(2)}</td>
-      <td class="mono" style="color:var(--red);font-size:11px;">
-        Eldorado: -$${p.taxaUSD.toFixed(2)}<br>
-        Payoneer: -$${(taxaPayPct+taxaPayFixa).toFixed(2)}<br>
-        Transf: -$${taxaTransf.toFixed(2)}
+      <td class="td-nome">
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px;">${p.nome}</div>
+        ${loteNomeV ? `<span style="font-size:10px;background:rgba(245,200,66,0.1);border:1px solid rgba(245,200,66,0.3);border-radius:10px;padding:2px 8px;color:var(--gold);">📦 ${loteNomeV}</span>` : ''}
       </td>
-      <td class="mono" style="color:var(--blue)">$ ${usdVendido.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">≈ R$ ${(usdVendido*cotacaoUSD).toFixed(2)}</span></td>
-      <td class="mono" style="color:var(--green)">$ ${finalUSD.toFixed(2)}<br><span style="color:var(--text2);font-size:11px;">≈ R$ ${finalBRL.toFixed(2)}</span></td>
-      <td class="${lucroLiqClass}">${lucroLiqPfx}R$ ${lucroRealLiq.toFixed(2)}</td>
-      <td class="mono">${fmtDate(p.dataPostagem)}</td>
-      <td class="mono">${fmtDate(p.dataVenda)}</td>
-      <td class="mono">${p.diasParaVender ?? '--'} dias</td>
+      <td>
+        <span style="font-size:16px;">${catIcon(p.categoria)}</span>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${p.categoria}</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;">$ ${p.vendaUSD.toFixed(2)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">≈ R$ ${(p.vendaUSD*cotacaoUSD).toFixed(2)}</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;color:var(--blue);">R$ ${finalBRL.toFixed(2)}</div>
+        <div style="font-size:10px;color:var(--text2);margin-top:2px;">$ ${finalUSD.toFixed(2)} líquido</div>
+      </td>
+      <td class="td-valor">
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;" class="${lucroLiqClass}">${lucroLiqPfx}R$ ${lucroRealLiq.toFixed(2)}</div>
+        ${p.compra > 0 ? `<div style="font-size:10px;color:var(--text2);margin-top:2px;">invest. R$ ${p.compra.toFixed(2)}</div>` : ''}
+      </td>
+      <td class="td-data">
+        <div style="font-family:var(--mono);font-size:13px;">${fmtDate(p.dataPostagem)}</div>
+      </td>
+      <td class="td-data">
+        <div style="font-family:var(--mono);font-size:13px;">${fmtDate(p.dataVenda)}</div>
+        <span class="badge badge-sold" style="font-size:10px;margin-top:4px;">✅ Vendido</span>
+      </td>
+      <td>
+        <div style="font-family:var(--mono);font-weight:700;font-size:14px;">${p.diasParaVender ?? '--'}d</div>
+      </td>
       <td><div class="action-btns">
         <button class="action-btn del" title="Remover" data-idx="${p._i}">🗑</button>
       </div></td>
@@ -3035,19 +3064,16 @@ window.esconderLogin = esconderLogin;
 </script>
 
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  }
+
+
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(reg => reg.unregister());
   }).then(() => {
     navigator.serviceWorker.register('./service-worker.js')
-      .then(reg => { reg.update(); console.log('SW registrado'); })
-      .catch(e => console.warn('SW falhou:', e));
+      .then(reg => { reg.update(); console.log('SW ok'); })
+      .catch(e => console.warn('SW:', e));
   });
 }
 </script>
