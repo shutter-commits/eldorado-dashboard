@@ -946,6 +946,17 @@ select option { background:var(--surface); }
           <p style="margin-top:8px;font-size:12px;color:var(--text2);" id="taxa-atual">Taxa atual: <strong>15%</strong></p>
         </div>
 
+        <!-- Meu User ID -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;">🔑 Meu User ID</div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Cole este ID no seu Apps Script para receber notificações de pedidos.</p>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="user-id-display" readonly style="flex:1;font-family:var(--mono);font-size:11px;color:var(--text2);cursor:pointer;" value="Faça login para ver">
+            <button class="btn btn-gold btn-sm" onclick="copiarUserId()">📋 Copiar</button>
+          </div>
+          <p style="margin-top:8px;font-size:11px;color:var(--text2);">Use este ID na variável <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-family:var(--mono);">USER_ID</code> do Apps Script.</p>
+        </div>
+
         <!-- Limpar dados -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;">🗑️ Limpar Dados</div>
@@ -1340,6 +1351,9 @@ function setUserUI(user) {
   currentUser = user;
   const email = user.email || '';
   const ini = email.substring(0,2).toUpperCase();
+  // Preencher user ID nas configurações
+  const uidEl = document.getElementById('user-id-display');
+  if (uidEl) uidEl.value = user.id || '';
   // Sidebar
   const si = document.getElementById('user-initials');
   const se = document.getElementById('user-email-sidebar');
@@ -1497,7 +1511,12 @@ function navTo(page, el) {
   }
 
   if (page === 'graficos') setTimeout(renderGraficos, 50);
-  if (page === 'configuracoes') { renderConfigCats(); renderConfigBrainrots(); }
+  if (page === 'configuracoes') {
+    renderConfigCats();
+    renderConfigBrainrots();
+    const uidEl = document.getElementById('user-id-display');
+    if (uidEl && currentUser) uidEl.value = currentUser.id || '';
+  }
   closeSidebar();
 }
 
@@ -2625,6 +2644,21 @@ function resetarBrainrots() {
   showToast('Lista resetada!', 'info');
 }
 
+function copiarUserId() {
+  const el = document.getElementById('user-id-display');
+  if (!el || !el.value || el.value === 'Faça login para ver') {
+    showToast('User ID não disponível.', 'error');
+    return;
+  }
+  navigator.clipboard.writeText(el.value).then(() => {
+    showToast('User ID copiado!', 'success');
+  }).catch(() => {
+    el.select();
+    document.execCommand('copy');
+    showToast('User ID copiado!', 'success');
+  });
+}
+
 function salvarTaxa() {
   const v=parseFloat(document.getElementById('taxa-input').value);
   if(isNaN(v)||v<0||v>100){showToast('Taxa inválida!','error');return;}
@@ -2726,7 +2760,9 @@ function enviarPushNotification(titulo, corpo) {
 async function carregarPedidos(manual = false) {
   try {
     // Usar fetch direto pois pedidos não tem RLS por usuário
-    const r = await fetch(SUPA_URL + '/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50', {
+    const uid = currentUser?.id;
+    const uidFilter = uid ? `&user_id=eq.${uid}` : '';
+    const r = await fetch(SUPA_URL + `/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50${uidFilter}`, {
       headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
     });
     const data = await r.json();
@@ -2806,9 +2842,11 @@ function renderPedidos() {
 
 async function marcarLido(id) {
   try {
-    await fetch(SUPA_URL + `/rest/v1/pedidos_eldorado?id=eq.${id}`, {
+    const uid2 = currentUser?.id;
+    const filter2 = uid2 ? `&user_id=eq.${uid2}` : '';
+    await fetch(SUPA_URL + `/rest/v1/pedidos_eldorado?id=eq.${id}${filter2}`, {
       method: 'PATCH',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ lido: true })
     });
     await carregarPedidos();
@@ -2817,9 +2855,11 @@ async function marcarLido(id) {
 
 async function marcarTodosLidos() {
   try {
-    await fetch(SUPA_URL + '/rest/v1/pedidos_eldorado?lido=eq.false', {
+    const uid3 = currentUser?.id;
+    const filter3 = uid3 ? `&user_id=eq.${uid3}` : '';
+    await fetch(SUPA_URL + `/rest/v1/pedidos_eldorado?lido=eq.false${filter3}`, {
       method: 'PATCH',
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ lido: true })
     });
     await carregarPedidos();
@@ -2883,6 +2923,7 @@ window.excluirLoteDirecto = excluirLoteDirecto;
 window.adicionarCategoria = adicionarCategoria;
 window.removerCategoria = removerCategoria;
 window.resetarCategorias = resetarCategorias;
+window.copiarUserId = copiarUserId;
 window.adicionarBrainrot = adicionarBrainrot;
 window.removerBrainrot = removerBrainrot;
 window.resetarBrainrots = resetarBrainrots;
