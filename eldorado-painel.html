@@ -2744,7 +2744,7 @@ function enviarPushNotification(titulo, corpo) {
   } catch(e) { console.warn('Push:', e); }
 }
 
-async function carregarPedidos() {
+async function carregarPedidos(manual = false) {
   try {
     const data = await supaFetch('GET', '/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50');
     const novos = (data||[]).filter(p => !p.lido);
@@ -2787,7 +2787,8 @@ function renderPedidos() {
   const status = document.getElementById('pedidos-status');
   if (status) {
     const naoLidos = pedidos.filter(p => !p.lido).length;
-    status.textContent = naoLidos > 0 ? `${naoLidos} não lido(s)` : 'Tudo em dia ✓';
+    const agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    status.textContent = naoLidos > 0 ? `${naoLidos} não lido(s) · atualizado ${agora}` : `Tudo em dia ✓ · ${agora}`;
     status.style.color = naoLidos > 0 ? 'var(--gold)' : 'var(--green)';
   }
   if (pedidos.length === 0) {
@@ -2838,7 +2839,7 @@ async function marcarTodosLidos() {
 async function verificarPedidosManual() {
   const status = document.getElementById('pedidos-status');
   if (status) { status.textContent = 'Verificando...'; status.style.color = 'var(--text2)'; }
-  await carregarPedidos();
+  await carregarPedidos(true);
   showToast('Pedidos atualizados!', 'info');
 }
 
