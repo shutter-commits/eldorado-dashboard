@@ -2532,6 +2532,7 @@ function renderConfigCats() {
     const usedCount = produtos.filter(p => p.categoria === cat).length;
     return `<div style="display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;">
       <span style="font-size:13px;font-weight:600;">${label}</span>
+      <span style="font-size:10px;color:var(--text2);font-family:var(--mono);background:var(--surface);border-radius:6px;padding:2px 6px;">${cat}</span>
       ${usedCount > 0 ? `<span style="font-size:10px;color:var(--text2);background:var(--surface);border-radius:10px;padding:1px 6px;">${usedCount} produto(s)</span>` : ''}
       <button onclick="removerCategoria('${cat}')" title="${isDefault ? 'Categoria padrão — pode remover' : 'Remover'}" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:14px;padding:0;line-height:1;opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✕</button>
     </div>`;
