@@ -272,6 +272,38 @@ select option { background:var(--surface); }
 .empty-state .icon { font-size:36px; margin-bottom:10px; }
 .empty-state p { font-size:14px; }
 
+/* ===== NOTIFICAÇÕES / PEDIDOS ===== */
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 800;
+  width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: pulse-badge 1.5s infinite;
+}
+@keyframes pulse-badge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+
+.pedido-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
+  margin-bottom: 10px; display: flex;
+  justify-content: space-between; align-items: center;
+  transition: all 0.2s;
+}
+.pedido-card.novo {
+  border-color: var(--gold);
+  background: rgba(245,200,66,0.05);
+  animation: slideIn 0.3s ease;
+}
+.pedido-card.lido { opacity: 0.6; }
+@keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
+.pedido-badge-novo {
+  background: rgba(245,200,66,0.15); color: var(--gold);
+  border: 1px solid rgba(245,200,66,0.3);
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; white-space: nowrap;
+}
+
 /* ===== TOAST ===== */
 .toast {
   position:fixed; bottom:20px; right:20px;
@@ -590,6 +622,10 @@ select option { background:var(--surface); }
 
   <div class="sidebar-section">
     <div class="sidebar-section-label">Finanças</div>
+    <button class="nav-item" onclick="navTo('pedidos',this)" style="position:relative;">
+      <span class="nav-icon">🔔</span> Pedidos
+      <span class="nav-badge" id="badge-pedidos" style="display:none;background:var(--red);">0</span>
+    </button>
     <button class="nav-item" onclick="navTo('carteira',this)">
       <span class="nav-icon">💰</span> Carteira
     </button>
@@ -666,6 +702,7 @@ select option { background:var(--surface); }
       <button class="desktop-tab" onclick="navTo('ativos',this)">📦 Ativos <span class="desktop-tab-badge" id="dbadge-ativos" style="display:none">0</span></button>
       <button class="desktop-tab" onclick="navTo('vendidos',this)">✅ Vendidos</button>
       <button class="desktop-tab" onclick="navTo('lotes',this)">🗃️ Lotes</button>
+      <button class="desktop-tab" onclick="navTo('pedidos',this)" style="position:relative;">🔔 Pedidos <span id="dbadge-pedidos" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;vertical-align:middle;">0</span></button>
       <button class="desktop-tab" onclick="navTo('carteira',this)">💰 Carteira</button>
       <button class="desktop-tab" onclick="navTo('graficos',this)">📊 Gráficos</button>
       <button class="desktop-tab" onclick="navTo('calculadora',this)">🧮 Calculadora</button>
@@ -785,6 +822,21 @@ select option { background:var(--surface); }
         <button class="btn btn-gold btn-sm" onclick="abrirModalLote()">+ Novo Lote</button>
       </div>
       <div id="lotes-container"></div>
+    </div>
+
+    <!-- PAGE: PEDIDOS -->
+    <div class="page" id="page-pedidos">
+      <div class="section-header" style="margin-bottom:14px;">
+        <h2>🔔 Pedidos Eldorado</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="pedidos-status" style="font-size:12px;color:var(--text2);">Verificando...</span>
+          <button class="btn btn-ghost btn-sm" onclick="verificarPedidosManual()">↺ Atualizar</button>
+          <button class="btn btn-ghost btn-sm" onclick="marcarTodosLidos()">✓ Marcar todos lidos</button>
+        </div>
+      </div>
+      <div id="pedidos-container">
+        <div class="empty-state"><div class="icon">🔔</div><p>Nenhum pedido ainda.</p></div>
+      </div>
     </div>
 
     <!-- PAGE: CARTEIRA -->
@@ -1288,7 +1340,8 @@ async function supaFetch(method, path, body = null) {
 function mostrarLogin() {
   window._entrando = false;
   if (window._cotacaoInterval) { clearInterval(window._cotacaoInterval); window._cotacaoInterval = null; }
-  currentUser = null; produtos = []; lotes = []; carteira = [];
+  if (_pedidosInterval) { clearInterval(_pedidosInterval); _pedidosInterval = null; }
+  currentUser = null; produtos = []; lotes = []; carteira = []; pedidos = [];
   const ls = document.getElementById('login-screen');
   if (ls) ls.style.cssText = 'display:flex!important;';
 }
@@ -1356,6 +1409,8 @@ async function entrarNoPainel(user) {
   await carregarTudo();
   mostrarLoading(false);
   if (!window._cotacaoInterval) window._cotacaoInterval = setInterval(fetchCotacao, 60000);
+  await solicitarPushPermissao();
+  iniciarPollingPedidos();
   window._entrando = false;
 }
 
@@ -1434,6 +1489,7 @@ async function setupAuth() {
 
 // ===== NAVEGAÇÃO SIDEBAR =====
 const pageTitles = {
+  pedidos: ['Pedidos', 'Notificações da Eldorado'],
   compras: ['Compras', 'Produtos adquiridos'],
   ativos: ['Ativos', 'Produtos postados para venda'],
   vendidos: ['Vendidos', 'Histórico de vendas'],
@@ -2633,6 +2689,166 @@ function exportarCSV() {
   showToast('CSV exportado!','success');
 }
 
+// ===== PEDIDOS / NOTIFICAÇÕES =====
+let pedidos = [];
+let _pedidosInterval = null;
+let _audioCtx = null;
+
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+function tocarSom() {
+  try {
+    const ctx = getAudioCtx();
+    // Som de notificação — duas notas
+    [0, 0.15].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = i === 0 ? 880 : 1100;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.4);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.4);
+    });
+  } catch(e) { console.warn('Audio:', e); }
+}
+
+async function solicitarPushPermissao() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+function enviarPushNotification(titulo, corpo) {
+  if (Notification.permission !== 'granted') return;
+  try {
+    const notif = new Notification(titulo, {
+      body: corpo,
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      vibrate: [200, 100, 200],
+      tag: 'eldorado-pedido',
+      requireInteraction: true
+    });
+    notif.onclick = () => {
+      window.focus();
+      navTo('pedidos', document.querySelector('[onclick*="pedidos"]'));
+      notif.close();
+    };
+  } catch(e) { console.warn('Push:', e); }
+}
+
+async function carregarPedidos() {
+  try {
+    const data = await supaFetch('GET', '/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50');
+    const novos = (data||[]).filter(p => !p.lido);
+    const anterior = pedidos.filter(p => !p.lido).length;
+    pedidos = data||[];
+
+    // Detectar novos pedidos (mais do que antes)
+    if (novos.length > anterior && anterior >= 0) {
+      const diff = novos.length - anterior;
+      tocarSom();
+      novos.slice(0, diff).forEach(p => {
+        enviarPushNotification(
+          '🔔 Novo pedido na Eldorado!',
+          `${p.item_nome} — $ ${parseFloat(p.valor_usd).toFixed(2)}`
+        );
+        showToast(`🔔 Novo pedido: ${p.item_nome} — $${parseFloat(p.valor_usd).toFixed(2)}`, 'success');
+      });
+    }
+
+    renderPedidos();
+    atualizarBadgePedidos();
+  } catch(e) { console.error('carregarPedidos:', e.message); }
+}
+
+function atualizarBadgePedidos() {
+  const naoLidos = pedidos.filter(p => !p.lido).length;
+  // Sidebar
+  const sb = document.getElementById('badge-pedidos');
+  if (sb) { sb.style.display = naoLidos > 0 ? 'block' : 'none'; sb.textContent = naoLidos; }
+  // Desktop
+  const db = document.getElementById('dbadge-pedidos');
+  if (db) { db.style.display = naoLidos > 0 ? 'inline-block' : 'none'; db.textContent = naoLidos; }
+  // Title bar
+  document.title = naoLidos > 0 ? `(${naoLidos}) Eldorado Dashboard` : 'Eldorado Dashboard';
+}
+
+function renderPedidos() {
+  const c = document.getElementById('pedidos-container');
+  if (!c) return;
+  const status = document.getElementById('pedidos-status');
+  if (status) {
+    const naoLidos = pedidos.filter(p => !p.lido).length;
+    status.textContent = naoLidos > 0 ? `${naoLidos} não lido(s)` : 'Tudo em dia ✓';
+    status.style.color = naoLidos > 0 ? 'var(--gold)' : 'var(--green)';
+  }
+  if (pedidos.length === 0) {
+    c.innerHTML = `<div class="empty-state"><div class="icon">🔔</div><p>Nenhum pedido ainda. O Apps Script verifica a cada 5 minutos.</p></div>`;
+    return;
+  }
+  c.innerHTML = pedidos.map(p => {
+    const dt = new Date(p.criado_em);
+    const dtStr = `${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
+    const isNovo = !p.lido;
+    return `<div class="pedido-card ${isNovo ? 'novo' : 'lido'}">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:28px;">${isNovo ? '🔔' : '✅'}</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${p.item_nome||'Novo pedido'}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            ${p.categoria ? `<span style="font-size:11px;color:var(--text2);">📂 ${p.categoria}</span>` : ''}
+            <span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:700;">$ ${parseFloat(p.valor_usd||0).toFixed(2)}</span>
+            <span style="font-size:11px;color:var(--text2);">🕐 ${dtStr}</span>
+            ${p.order_id !== 'N/A' ? `<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">#${p.order_id.substring(0,8)}...</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+        ${isNovo ? `<span class="pedido-badge-novo">NOVO</span>` : ''}
+        ${isNovo ? `<button class="action-btn" onclick="marcarLido('${p.id}')" title="Marcar como lido">✓</button>` : ''}
+        <a href="https://eldorado.gg/orders" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;">Ver pedido →</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function marcarLido(id) {
+  try {
+    await supaFetch('PATCH', `/rest/v1/pedidos_eldorado?id=eq.${id}`, { lido: true });
+    await carregarPedidos();
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function marcarTodosLidos() {
+  try {
+    await supaFetch('PATCH', '/rest/v1/pedidos_eldorado?lido=eq.false', { lido: true });
+    await carregarPedidos();
+    showToast('Todos marcados como lidos.', 'info');
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
+async function verificarPedidosManual() {
+  const status = document.getElementById('pedidos-status');
+  if (status) { status.textContent = 'Verificando...'; status.style.color = 'var(--text2)'; }
+  await carregarPedidos();
+  showToast('Pedidos atualizados!', 'info');
+}
+
+function iniciarPollingPedidos() {
+  // Verificar a cada 30 segundos
+  if (_pedidosInterval) clearInterval(_pedidosInterval);
+  _pedidosInterval = setInterval(carregarPedidos, 30000);
+  carregarPedidos(); // checar imediatamente
+}
+
 // ===== WINDOW EXPORTS =====
 window.loginGoogle = window.loginGoogle;
 window.loginEmail = window.loginEmail;
@@ -2645,6 +2861,9 @@ window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 window.toggleUserMenu = toggleUserMenu;
 window.toggleDesktopUserMenu = toggleDesktopUserMenu;
+window.verificarPedidosManual = verificarPedidosManual;
+window.marcarLido = marcarLido;
+window.marcarTodosLidos = marcarTodosLidos;
 window.logout = logout;
 window.mostrarCadastro = mostrarCadastro;
 window.mostrarEntrar = mostrarEntrar;
