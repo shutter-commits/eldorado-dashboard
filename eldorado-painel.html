@@ -1296,7 +1296,7 @@ function mostrarLogin() {
   window._entrando = false;
   if (window._cotacaoInterval) { clearInterval(window._cotacaoInterval); window._cotacaoInterval = null; }
   if (_pedidosInterval) { clearInterval(_pedidosInterval); _pedidosInterval = null; }
-  currentUser = null; produtos = []; lotes = []; carteira = []; pedidos = [];
+  currentUser = null; produtos = []; lotes = []; pedidos = [];
   const ls = document.getElementById('login-screen');
   if (ls) ls.style.cssText = 'display:flex!important;';
 }
@@ -1423,17 +1423,18 @@ function showLoginError(id, msg) {
 async function setupAuth() {
   dbg('setupAuth iniciado');
   sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-  document.getElementById('taxa-input').value = taxa;
-  document.getElementById('taxa-atual').innerHTML = `Taxa atual: <strong>${taxa}%</strong>`;
-  document.getElementById('fm-data').value = hoje();
-  document.getElementById('fc-data').value = hoje();
-  document.getElementById('fp-data').value = hoje();
-  document.getElementById('fv-data').value = hoje();
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  const setHTML = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+  setVal('taxa-input', taxa);
+  setHTML('taxa-atual', `Taxa atual: <strong>${taxa}%</strong>`);
+  setVal('fc-data', hoje());
+  setVal('fp-data', hoje());
+  setVal('fv-data', hoje());
 
   sbClient.auth.onAuthStateChange(async (event, session) => {
     dbg('Evento=' + event + ' user=' + (session?.user?.email || 'none'));
     if (event === 'SIGNED_IN' && session?.user) await entrarNoPainel(session.user);
-    else if (event === 'SIGNED_OUT') { currentUser = null; produtos = []; lotes = []; carteira = []; renderAll(); mostrarLogin(); }
+    else if (event === 'SIGNED_OUT') { currentUser = null; produtos = []; lotes = []; renderAll(); mostrarLogin(); }
   });
 
   const { data: { session } } = await sbClient.auth.getSession();
@@ -1552,7 +1553,7 @@ async function fetchCotacao() {
 
 // ===== CARREGAR DADOS =====
 async function carregarTudo() {
-  await Promise.all([carregarProdutos(), carregarLotes(), carregarCarteira()]);
+  await Promise.all([carregarProdutos(), carregarLotes()]);
   renderAll();
 }
 
@@ -1587,14 +1588,6 @@ async function carregarLotes() {
   } catch(e) { console.error('carregarLotes:', e.message); }
 }
 
-async function carregarCarteira() {
-  try {
-    const uid = currentUser?.id;
-    const f = uid ? `&user_id=eq.${uid}` : '';
-    const data = await supaFetch('GET', `/rest/v1/carteira?select=*&order=criado_em.desc${f}`);
-    carteira = data||[];
-  } catch(e) { console.error('carregarCarteira:', e.message); }
-}
 
 function atualizarDropdownLotes() {
   ['fc-lote','f-lote-ativos'].forEach(id => {
@@ -1621,7 +1614,6 @@ function renderAll() {
   renderAtivos();
   renderVendidos();
   renderLotes();
-  renderCarteira();
   renderSummaryBadges();
 }
 
@@ -1984,139 +1976,11 @@ function renderCarteira() {
 }
 
 // ===== CARTEIRA MODALS =====
-function abrirMovimentacao() {
-  document.getElementById('fm-data').value = hoje();
-  document.getElementById('fm-usd').value = '';
-  document.getElementById('fm-desc').value = '';
-  document.getElementById('mov-preview').style.display = 'none';
-  document.getElementById('modal-mov-overlay').classList.add('open');
-}
-function fecharMovimentacao() { document.getElementById('modal-mov-overlay').classList.remove('open'); }
 
-function obterTudoCarteira() {
-  const tipo = document.getElementById('fm-tipo').value;
-  // Recalcular saldos atuais
-  const vendas = produtos.filter(p => p.status === 'vendido');
-  const totalVendasUSD = vendas.reduce((a,p) => a + (calcTaxas(p.vendaUSD||0,0).creditoPayoneer), 0);
-  const saquesEld = carteira.filter(m => m.tipo === 'saque_eldorado').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
-  const transfPay = carteira.filter(m => m.tipo === 'transferencia_nubank').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
-  const saldoEld = Math.max(0, totalVendasUSD - saquesEld);
-  const saldoPay = Math.max(0, saquesEld - transfPay);
 
-  let valor = 0;
-  if (tipo === 'saque_eldorado') valor = saldoEld;
-  else if (tipo === 'transferencia_nubank') valor = saldoPay;
-  else valor = 0;
-
-  if (valor <= 0) { showToast('Saldo insuficiente ou zero.', 'info'); return; }
-  document.getElementById('fm-usd').value = valor.toFixed(2);
-  calcMovPreview();
-  showToast(`Valor preenchido: $ ${valor.toFixed(2)}`, 'info');
-}
-
-function calcMovPreview() {
-  const tipo = document.getElementById('fm-tipo').value;
-  const usd = parseFloat(document.getElementById('fm-usd').value)||0;
-  if (!usd) { document.getElementById('mov-preview').style.display = 'none'; return; }
-  document.getElementById('mov-preview').style.display = 'block';
-  document.getElementById('mp-bruto').textContent = `$ ${usd.toFixed(2)}`;
-  if (tipo === 'saque_eldorado') {
-    const taxaPay = usd*0.04 + 2;
-    const liq = usd - taxaPay;
-    document.getElementById('mp-taxa-row').style.display = 'flex';
-    document.getElementById('mp-taxa').textContent = `- $ ${taxaPay.toFixed(2)} (4%+$2)`;
-    document.getElementById('mp-liq').textContent = `$ ${liq.toFixed(2)}`;
-  } else if (tipo === 'transferencia_nubank') {
-    const taxa = usd*0.02;
-    const liq = usd - taxa;
-    const brl = liq * cotacaoUSD;
-    document.getElementById('mp-taxa-row').style.display = 'flex';
-    document.getElementById('mp-taxa').textContent = `- $ ${taxa.toFixed(2)} (2%)`;
-    document.getElementById('mp-liq').textContent = `R$ ${brl.toFixed(2)}`;
-  } else {
-    document.getElementById('mp-taxa-row').style.display = 'none';
-    document.getElementById('mp-liq').textContent = `R$ ${(usd*cotacaoUSD).toFixed(2)}`;
-  }
-}
-
-function toggleMovCampos() { calcMovPreview(); }
-
-async function salvarMovimentacao() {
-  const tipo = document.getElementById('fm-tipo').value;
-  const usdRaw = parseFloat(document.getElementById('fm-usd').value)||0;
-  const data = document.getElementById('fm-data').value;
-  const desc = document.getElementById('fm-desc').value.trim();
-  if (!usdRaw) { showToast('Preencha o valor!', 'error'); return; }
-  let val_usd = usdRaw, val_brl = 0;
-  if (tipo === 'saque_eldorado') {
-    val_usd = usdRaw - usdRaw*0.04 - 2;
-  } else if (tipo === 'transferencia_nubank') {
-    val_usd = usdRaw;
-    val_brl = (usdRaw - usdRaw*0.02) * cotacaoUSD;
-  } else {
-    val_brl = usdRaw * cotacaoUSD;
-    val_usd = 0;
-  }
-  try {
-    await supaFetch('POST', '/rest/v1/carteira', { tipo, origem: tipo==='saque_eldorado'?'eldorado':tipo==='transferencia_nubank'?'payoneer':'manual', destino: tipo==='saque_eldorado'?'payoneer':tipo==='transferencia_nubank'?'nubank':'nubank', valor_usd: val_usd, valor_brl: val_brl, descricao: desc, user_id: currentUser?.id });
-    fecharMovimentacao();
-    await carregarCarteira();
-    renderCarteira();
-    showToast('Movimentação registrada!', 'success');
-  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
-}
-
-async function deletarMovimentacao(id) {
-  try {
-    await supaFetch('DELETE', `/rest/v1/carteira?id=eq.${id}`);
-    await carregarCarteira();
-    renderCarteira();
-    showToast('Removido.', 'info');
-  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
-}
 
 // ===== SIMULADOR =====
-function abrirSimulador(tipo) {
-  document.getElementById('simulador-panel').style.display = 'block';
-  document.getElementById('sim-valor').value = '';
-  document.getElementById('sim-resultado').innerHTML = '';
-  document.getElementById('sim-valor').dataset.tipo = tipo;
-  document.getElementById('sim-valor').focus();
-}
 
-function calcSimulador() {
-  const usd = parseFloat(document.getElementById('sim-valor').value)||0;
-  const tipo = document.getElementById('sim-valor').dataset.tipo||'eldorado';
-  if (!usd) { document.getElementById('sim-resultado').innerHTML = ''; return; }
-  let html = '';
-  if (tipo === 'eldorado') {
-    const taxaPct = usd*0.04;
-    const aposPayPct = usd - taxaPct - 2;
-    const taxaTransf = aposPayPct*0.02;
-    const liq = aposPayPct - taxaTransf;
-    const brl = liq*cotacaoUSD;
-    html = `<div style="margin-top:10px;">
-      <div class="sim-row"><span>Saldo Eldorado</span><span class="mono" style="font-weight:700;">$ ${usd.toFixed(2)}</span></div>
-      <div class="sim-row"><span>Taxa Payoneer (4%)</span><span class="mono" style="color:var(--red);">- $ ${taxaPct.toFixed(2)}</span></div>
-      <div class="sim-row"><span>Taxa fixa Payoneer</span><span class="mono" style="color:var(--red);">- $ 2,00</span></div>
-      <div class="sim-row"><span style="font-weight:600;">Crédito Payoneer</span><span class="mono" style="color:var(--blue);font-weight:700;">$ ${aposPayPct.toFixed(2)}</span></div>
-      <div style="height:1px;background:var(--border);margin:4px 0;"></div>
-      <div class="sim-row"><span>Taxa transferência (2%)</span><span class="mono" style="color:var(--red);">- $ ${taxaTransf.toFixed(2)}</span></div>
-      <div class="sim-row" style="padding:10px 0;"><span style="font-weight:800;font-size:14px;">💰 Você recebe na Nubank</span><div style="text-align:right;"><div class="mono" style="font-weight:800;font-size:18px;color:var(--green);">R$ ${brl.toFixed(2)}</div><div style="font-size:11px;color:var(--text2);">$ ${liq.toFixed(2)} líquido</div></div></div>
-      <div style="background:rgba(255,77,109,0.08);border-radius:8px;padding:10px;margin-top:4px;font-size:12px;color:var(--text2);">Total em taxas: <strong style="color:var(--red);">$ ${(usd-liq).toFixed(2)}</strong> (${((usd-liq)/usd*100).toFixed(1)}% do valor)</div>
-    </div>`;
-  } else {
-    const taxaTransf = usd*0.02;
-    const liq = usd - taxaTransf;
-    const brl = liq*cotacaoUSD;
-    html = `<div style="margin-top:10px;">
-      <div class="sim-row"><span>Saldo Payoneer</span><span class="mono" style="font-weight:700;">$ ${usd.toFixed(2)}</span></div>
-      <div class="sim-row"><span>Taxa transferência (2%)</span><span class="mono" style="color:var(--red);">- $ ${taxaTransf.toFixed(2)}</span></div>
-      <div class="sim-row" style="padding:10px 0;"><span style="font-weight:800;font-size:14px;">💰 Você recebe na Nubank</span><div style="text-align:right;"><div class="mono" style="font-weight:800;font-size:18px;color:var(--green);">R$ ${brl.toFixed(2)}</div></div></div>
-    </div>`;
-  }
-  document.getElementById('sim-resultado').innerHTML = html;
-}
 
 // ===== MODAL COMPRA =====
 function abrirModalCompra(idx = null) {
@@ -2951,15 +2815,6 @@ window.confirmarVenda = confirmarVenda;
 window.abrirModalLote = abrirModalLote;
 window.fecharModalLote = fecharModalLote;
 window.salvarLote = salvarLote;
-window.abrirMovimentacao = abrirMovimentacao;
-window.fecharMovimentacao = fecharMovimentacao;
-window.calcMovPreview = calcMovPreview;
-window.toggleMovCampos = toggleMovCampos;
-window.obterTudoCarteira = obterTudoCarteira;
-window.salvarMovimentacao = salvarMovimentacao;
-window.deletarMovimentacao = deletarMovimentacao;
-window.abrirSimulador = abrirSimulador;
-window.calcSimulador = calcSimulador;
 window.cancelarConfirm = cancelarConfirm;
 window.excluirLoteDirecto = excluirLoteDirecto;
 window.adicionarCategoria = adicionarCategoria;
