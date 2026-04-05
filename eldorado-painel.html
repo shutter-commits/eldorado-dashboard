@@ -2725,7 +2725,11 @@ function enviarPushNotification(titulo, corpo) {
 
 async function carregarPedidos(manual = false) {
   try {
-    const data = await supaFetch('GET', '/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50');
+    // Usar fetch direto pois pedidos não tem RLS por usuário
+    const r = await fetch(SUPA_URL + '/rest/v1/pedidos_eldorado?select=*&order=criado_em.desc&limit=50', {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+    });
+    const data = await r.json();
     const novos = (data||[]).filter(p => !p.lido);
     const anterior = pedidos.filter(p => !p.lido).length;
     pedidos = data||[];
@@ -2794,7 +2798,7 @@ function renderPedidos() {
       <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
         ${isNovo ? `<span class="pedido-badge-novo">NOVO</span>` : ''}
         ${isNovo ? `<button class="action-btn" onclick="marcarLido('${p.id}')" title="Marcar como lido">✓</button>` : ''}
-        <a href="https://eldorado.gg/orders" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;">Ver pedido →</a>
+        <a href="https://www.eldorado.gg/order/${p.order_id}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;">Ver pedido →</a>
       </div>
     </div>`;
   }).join('');
@@ -2802,14 +2806,22 @@ function renderPedidos() {
 
 async function marcarLido(id) {
   try {
-    await supaFetch('PATCH', `/rest/v1/pedidos_eldorado?id=eq.${id}`, { lido: true });
+    await fetch(SUPA_URL + `/rest/v1/pedidos_eldorado?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lido: true })
+    });
     await carregarPedidos();
   } catch(e) { showToast('Erro: ' + e.message, 'error'); }
 }
 
 async function marcarTodosLidos() {
   try {
-    await supaFetch('PATCH', '/rest/v1/pedidos_eldorado?lido=eq.false', { lido: true });
+    await fetch(SUPA_URL + '/rest/v1/pedidos_eldorado?lido=eq.false', {
+      method: 'PATCH',
+      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lido: true })
+    });
     await carregarPedidos();
     showToast('Todos marcados como lidos.', 'info');
   } catch(e) { showToast('Erro: ' + e.message, 'error'); }
