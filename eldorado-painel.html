@@ -871,11 +871,16 @@ select option { background:var(--surface); }
         <div style="display:flex;gap:8px;align-items:center;">
           <span id="pedidos-status" style="font-size:12px;color:var(--text2);">Verificando...</span>
           <button class="btn btn-ghost btn-sm" onclick="verificarPedidosManual()">↺ Atualizar</button>
-          <button class="btn btn-ghost btn-sm" onclick="marcarTodosLidos()">✓ Marcar todos lidos</button>
+          <button class="btn btn-ghost btn-sm" onclick="marcarTodosLidos()">✓ Todos lidos</button>
         </div>
       </div>
-      <div id="pedidos-container">
-        <div class="empty-state"><div class="icon">🔔</div><p>Nenhum pedido ainda.</p></div>
+      <div id="pedidos-container"></div>
+      <!-- Paginação -->
+      <div id="pedidos-paginacao" style="display:none;justify-content:center;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" id="pag-prev" onclick="mudarPaginaPedidos(-1)">← Anterior</button>
+        <div id="pag-numeros" style="display:flex;gap:4px;"></div>
+        <button class="btn btn-ghost btn-sm" id="pag-next" onclick="mudarPaginaPedidos(1)">Próxima →</button>
+        <span id="pag-info" style="font-size:12px;color:var(--text2);margin-left:8px;"></span>
       </div>
     </div>
 
@@ -1001,6 +1006,20 @@ select option { background:var(--surface); }
             <button class="btn btn-gold btn-sm" onclick="salvarTaxa()">Salvar</button>
           </div>
           <p style="margin-top:8px;font-size:12px;color:var(--text2);" id="taxa-atual">Taxa atual: <strong>15%</strong></p>
+        </div>
+
+        <!-- Pedidos por página -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;">📋 Pedidos por Página</div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Quantidade de pedidos exibidos por página.</p>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="pedidos-por-pagina" onchange="salvarPedidosPorPagina()" style="flex:1;">
+              <option value="5">5 por página</option>
+              <option value="10" selected>10 por página</option>
+              <option value="20">20 por página</option>
+              <option value="50">50 por página</option>
+            </select>
+          </div>
         </div>
 
         <!-- Meu User ID -->
@@ -1339,7 +1358,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 const USER_ID = 'COLE-SEU-USER-ID-AQUI';
 
 function verificarPedidos() {
-  const query = 'from:<strong>api@eldorado.gg</strong> subject:"New Order" is:unread newer_than:10m';
+  const query = 'from:<strong><strong>api@eldorado.gg</strong></strong> subject:"New Order" is:unread newer_than:15m';
   const threads = GmailApp.search(query);
   if (threads.length === 0) return;
   threads.forEach(thread => {
@@ -1674,6 +1693,8 @@ function navTo(page, el) {
     renderConfigBrainrots();
     const uidEl = document.getElementById('user-id-display');
     if (uidEl && currentUser) uidEl.value = currentUser.id || '';
+    const ppEl = document.getElementById('pedidos-por-pagina');
+    if (ppEl) ppEl.value = getPedidosPorPagina().toString();
   }
   closeSidebar();
 }
@@ -2887,6 +2908,18 @@ function exportarCSV() {
 let pedidos = [];
 let _pedidosInterval = null;
 let _audioCtx = null;
+let _paginaAtual = 1;
+
+function getPedidosPorPagina() {
+  return parseInt(localStorage.getItem('ezz_pedidos_pagina') || '10');
+}
+function salvarPedidosPorPagina() {
+  const v = document.getElementById('pedidos-por-pagina')?.value || '10';
+  localStorage.setItem('ezz_pedidos_pagina', v);
+  _paginaAtual = 1;
+  renderPedidos();
+  showToast(`Limite alterado para ${v} por página.`, 'info');
+}
 
 function getAudioCtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -3032,18 +3065,30 @@ function atualizarBadgePedidos() {
 function renderPedidos() {
   const c = document.getElementById('pedidos-container');
   if (!c) return;
+
+  // Status
   const status = document.getElementById('pedidos-status');
   if (status) {
     const naoLidos = pedidos.filter(p => !p.lido).length;
     const agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
-    status.textContent = naoLidos > 0 ? `${naoLidos} não lido(s) · atualizado ${agora}` : `Tudo em dia ✓ · ${agora}`;
+    status.textContent = naoLidos > 0 ? `${naoLidos} não lido(s) · ${agora}` : `Tudo em dia ✓ · ${agora}`;
     status.style.color = naoLidos > 0 ? 'var(--gold)' : 'var(--green)';
   }
+
   if (pedidos.length === 0) {
     c.innerHTML = `<div class="empty-state"><div class="icon">🔔</div><p>Nenhum pedido ainda. O Apps Script verifica a cada 5 minutos.</p></div>`;
+    document.getElementById('pedidos-paginacao').style.display = 'none';
     return;
   }
-  c.innerHTML = pedidos.map(p => {
+
+  // Paginação
+  const porPagina = getPedidosPorPagina();
+  const totalPags = Math.ceil(pedidos.length / porPagina);
+  if (_paginaAtual > totalPags) _paginaAtual = totalPags;
+  const inicio = (_paginaAtual - 1) * porPagina;
+  const pagina = pedidos.slice(inicio, inicio + porPagina);
+
+  c.innerHTML = pagina.map(p => {
     const dt = new Date(p.criado_em);
     const dtStr = `${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}`;
     const isNovo = !p.lido;
@@ -3056,17 +3101,61 @@ function renderPedidos() {
             ${p.categoria ? `<span style="font-size:11px;color:var(--text2);">📂 ${p.categoria}</span>` : ''}
             <span style="font-family:var(--mono);font-size:12px;color:var(--green);font-weight:700;">$ ${parseFloat(p.valor_usd||0).toFixed(2)}</span>
             <span style="font-size:11px;color:var(--text2);">🕐 ${dtStr}</span>
-            ${p.order_id !== 'N/A' ? `<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">#${p.order_id.substring(0,8)}...</span>` : ''}
+            ${p.order_id && p.order_id !== 'N/A' ? `<span style="font-size:10px;color:var(--muted);font-family:var(--mono);">#${p.order_id.substring(0,8)}...</span>` : ''}
           </div>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
         ${isNovo ? `<span class="pedido-badge-novo">NOVO</span>` : ''}
         ${isNovo ? `<button class="action-btn" onclick="marcarLido('${p.id}')" title="Marcar como lido">✓</button>` : ''}
-        <a href="https://www.eldorado.gg/order/${p.order_id}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;">Ver pedido →</a>
+        <a href="https://www.eldorado.gg/order/${p.order_id}" target="_blank" class="btn btn-ghost btn-sm" style="font-size:11px;">Ver →</a>
       </div>
     </div>`;
   }).join('');
+
+  // Renderizar paginação
+  const pagDiv = document.getElementById('pedidos-paginacao');
+  const numDiv = document.getElementById('pag-numeros');
+  const infoEl = document.getElementById('pag-info');
+  const prevBtn = document.getElementById('pag-prev');
+  const nextBtn = document.getElementById('pag-next');
+
+  if (totalPags <= 1) {
+    pagDiv.style.display = 'none';
+    return;
+  }
+  pagDiv.style.display = 'flex';
+  prevBtn.disabled = _paginaAtual === 1;
+  nextBtn.disabled = _paginaAtual === totalPags;
+  if (infoEl) infoEl.textContent = `${inicio+1}–${Math.min(inicio+porPagina, pedidos.length)} de ${pedidos.length}`;
+
+  // Números das páginas
+  if (numDiv) {
+    const pages = [];
+    for (let i = 1; i <= totalPags; i++) {
+      if (i === 1 || i === totalPags || (i >= _paginaAtual - 2 && i <= _paginaAtual + 2)) {
+        pages.push(i);
+      } else if (pages[pages.length-1] !== '...') {
+        pages.push('...');
+      }
+    }
+    numDiv.innerHTML = pages.map(p => p === '...'
+      ? `<span style="color:var(--text2);padding:0 4px;">...</span>`
+      : `<button onclick="irParaPagina(${p})" class="btn btn-ghost btn-sm" style="min-width:32px;${p===_paginaAtual?'background:var(--gold);color:#000;border-color:var(--gold);':''}">${p}</button>`
+    ).join('');
+  }
+}
+
+function mudarPaginaPedidos(dir) {
+  const porPagina = getPedidosPorPagina();
+  const totalPags = Math.ceil(pedidos.length / porPagina);
+  _paginaAtual = Math.max(1, Math.min(totalPags, _paginaAtual + dir));
+  renderPedidos();
+}
+
+function irParaPagina(n) {
+  _paginaAtual = n;
+  renderPedidos();
 }
 
 function abrirModalAjudaPedidos() {
@@ -3172,6 +3261,9 @@ window.removerCategoria = removerCategoria;
 window.resetarCategorias = resetarCategorias;
 window.copiarUserId = copiarUserId;
 window.fecharGoogleNotif = fecharGoogleNotif;
+window.mudarPaginaPedidos = mudarPaginaPedidos;
+window.irParaPagina = irParaPagina;
+window.salvarPedidosPorPagina = salvarPedidosPorPagina;
 window.carregarSomNotif = carregarSomNotif;
 window.testarSomNotif = testarSomNotif;
 window.resetarSomNotif = resetarSomNotif;
@@ -3189,11 +3281,43 @@ window.limparFiltros = limparFiltros;
 window.exportarCSV = exportarCSV;
 window.renderGraficos = renderGraficos;
 window.toggleLote = toggleLote;
+window.mudarPaginaPedidos = mudarPaginaPedidos;
+window.irParaPagina = irParaPagina;
+window.salvarPedidosPorPagina = salvarPedidosPorPagina;
+window.fecharGoogleNotif = fecharGoogleNotif;
+window.carregarSomNotif = carregarSomNotif;
+window.testarSomNotif = testarSomNotif;
+window.resetarSomNotif = resetarSomNotif;
+window.copiarUserId = copiarUserId;
+window.abrirModalAjudaPedidos = abrirModalAjudaPedidos;
+window.fecharModalAjudaPedidos = fecharModalAjudaPedidos;
+window.copiarCodigoScript = copiarCodigoScript;
+window.adicionarCategoria = adicionarCategoria;
+window.removerCategoria = removerCategoria;
+window.resetarCategorias = resetarCategorias;
+window.adicionarBrainrot = adicionarBrainrot;
+window.removerBrainrot = removerBrainrot;
+window.resetarBrainrots = resetarBrainrots;
+window.excluirLoteDirecto = excluirLoteDirecto;
+window.confirmarAction = confirmarAction;
+window.cancelarConfirm = cancelarConfirm;
+window.marcarLido = marcarLido;
+window.marcarTodosLidos = marcarTodosLidos;
+window.verificarPedidosManual = verificarPedidosManual;
 
 document.addEventListener('DOMContentLoaded', setupAuth);
 </script>
 
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  }).then(() => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => reg.update())
+      .catch(e => console.warn(e));
+  });
+}
+</script>
+</body>
 </html>
