@@ -6,10 +6,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Eldorado">
-<meta name="theme-color" content="#f5c842">
+<meta name="apple-mobile-web-app-title" content="Ezz Dash">
+<meta name="theme-color" content="#4d9fff">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Eldorado Dashboard</title>
+<title>Ezz Dash</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -23,8 +23,8 @@
   --surface: #111118;
   --surface2: #1a1a24;
   --border: #2a2a3a;
-  --gold: #f5c842;
-  --gold2: #e8a820;
+  --gold: #4d9fff;
+  --gold2: #2979e8;
   --green: #2dff8a;
   --red: #ff4d6d;
   --blue: #4d9fff;
@@ -83,10 +83,10 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); min-hei
   border: none; background: none; width: 100%; text-align: left;
 }
 .nav-item:hover { background: var(--surface2); color: var(--text); }
-.nav-item.active { background: rgba(245,200,66,0.1); color: var(--gold); }
+.nav-item.active { background: rgba(77,159,255,0.1); color: var(--gold); }
 .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
 .nav-badge {
-  margin-left: auto; background: var(--gold); color: #000;
+  margin-left: auto; background: var(--gold); color: #fff;
   font-size: 9px; font-weight: 800; padding: 2px 6px;
   border-radius: 10px; min-width: 18px; text-align: center;
 }
@@ -107,7 +107,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); min-hei
   width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #000; flex-shrink: 0;
+  font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
 }
 .user-email { font-size: 11px; color: var(--text2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .user-dropdown {
@@ -142,7 +142,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); min-hei
   max-width: 100vw;
   overflow-x: hidden;
   background: var(--bg);
-  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,200,66,0.06) 0%, transparent 70%);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(77,159,255,0.06) 0%, transparent 70%);
 }
 #topbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -196,14 +196,14 @@ body { background:var(--bg); color:var(--text); font-family:var(--font); min-hei
 
 /* ===== BADGES ===== */
 .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; font-family:var(--mono); }
-.badge-ativo { background:rgba(245,200,66,0.12); color:var(--gold); border:1px solid rgba(245,200,66,0.25); }
+.badge-ativo { background:rgba(77,159,255,0.12); color:var(--gold); border:1px solid rgba(77,159,255,0.25); }
 .badge-vendido { background:rgba(45,255,138,0.12); color:var(--green); border:1px solid rgba(45,255,138,0.25); }
 .badge-estoque { background:rgba(77,159,255,0.12); color:var(--blue); border:1px solid rgba(77,159,255,0.25); }
 
 /* ===== BUTTONS ===== */
 .btn { padding:9px 16px; border-radius:8px; border:none; cursor:pointer; font-family:var(--font); font-size:13px; font-weight:600; transition:all 0.2s; }
-.btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#000; }
-.btn-gold:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(245,200,66,0.25); }
+.btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#fff; }
+.btn-gold:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(77,159,255,0.25); }
 .btn-ghost { background:var(--surface2); color:var(--text2); border:1px solid var(--border); }
 .btn-ghost:hover { border-color:var(--gold); color:var(--text); }
 .btn-danger { background:rgba(255,77,109,0.15); color:var(--red); border:1px solid rgba(255,77,109,0.3); }
@@ -292,14 +292,14 @@ select option { background:var(--surface); }
 }
 .pedido-card.novo {
   border-color: var(--gold);
-  background: rgba(245,200,66,0.05);
+  background: rgba(77,159,255,0.05);
   animation: slideIn 0.3s ease;
 }
 .pedido-card.lido { opacity: 0.6; }
 @keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
 .pedido-badge-novo {
-  background: rgba(245,200,66,0.15); color: var(--gold);
-  border: 1px solid rgba(245,200,66,0.3);
+  background: rgba(77,159,255,0.15); color: var(--gold);
+  border: 1px solid rgba(77,159,255,0.3);
   font-size: 10px; font-weight: 700; padding: 2px 8px;
   border-radius: 20px; white-space: nowrap;
 }
@@ -340,7 +340,7 @@ select option { background:var(--surface); }
   border-radius:var(--radius); padding:20px; position:relative; overflow:hidden;
 }
 .carteira-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-.carteira-card.eldorado::before { background:linear-gradient(90deg,#f5c842,#e8a820); }
+.carteira-card.eldorado::before { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
 .carteira-card.payoneer::before { background:linear-gradient(90deg,#FF6600,#FF8C00); }
 .carteira-card.nubank::before { background:linear-gradient(90deg,#8A05BE,#6B04A8); }
 .carteira-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
@@ -375,7 +375,7 @@ select option { background:var(--surface); }
 .lote-stat-val { font-family:var(--mono); font-weight:700; font-size:13px; }
 .lote-products { padding:12px 20px; }
 .lote-product-item { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; margin-bottom:6px; background:var(--surface2); transition:background 0.15s; }
-.lote-product-item:hover { background:rgba(245,200,66,0.05); }
+.lote-product-item:hover { background:rgba(77,159,255,0.05); }
 .lote-product-nome { font-weight:600; font-size:13px; cursor:pointer; transition:color 0.15s; }
 .lote-product-nome:hover { color:var(--gold); }
 .lote-progress { padding:0 20px 14px; }
@@ -402,7 +402,7 @@ select option { background:var(--surface); }
 #login-screen {
   display:flex; position:fixed; inset:0; background:var(--bg);
   z-index:9000; align-items:center; justify-content:center;
-  background-image:radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245,200,66,0.08) 0%, transparent 70%);
+  background-image:radial-gradient(ellipse 80% 50% at 50% -20%, rgba(77,159,255,0.08) 0%, transparent 70%);
 }
 .login-box {
   background:var(--surface); border:1px solid var(--border);
@@ -419,7 +419,7 @@ select option { background:var(--surface); }
   font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;
   margin-bottom:4px;
 }
-.btn-google:hover { border-color:var(--gold); background:rgba(245,200,66,0.05); transform:translateY(-1px); }
+.btn-google:hover { border-color:var(--gold); background:rgba(77,159,255,0.05); transform:translateY(-1px); }
 .login-divider { display:flex; align-items:center; gap:12px; margin:16px 0; }
 .login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 .login-divider span { font-size:11px; color:var(--muted); }
@@ -428,11 +428,11 @@ select option { background:var(--surface); }
 .btn-login {
   width:100%; padding:14px; border-radius:10px; border:none;
   background:linear-gradient(135deg,var(--gold),var(--gold2));
-  color:#000; font-family:var(--font); font-size:14px; font-weight:800;
+  color:#fff; font-family:var(--font); font-size:14px; font-weight:800;
   cursor:pointer; transition:all 0.2s; margin-top:4px;
   letter-spacing:0.3px;
 }
-.btn-login:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(245,200,66,0.3); }
+.btn-login:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(77,159,255,0.3); }
 .btn-login:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
 .btn-cadastrar {
   width:100%; padding:12px; border-radius:10px;
@@ -529,7 +529,7 @@ select option { background:var(--surface); }
   width: 30px; height: 30px;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
   border-radius: 8px; display: flex; align-items: center;
-  justify-content: center; font-size: 14px; font-weight: 800; color: #000; flex-shrink:0;
+  justify-content: center; font-size: 14px; font-weight: 800; color: #fff; flex-shrink:0;
 }
 .desktop-nav-logo span { font-size: 14px; font-weight: 800; }
 .desktop-nav-right {
@@ -551,7 +551,7 @@ select option { background:var(--surface); }
   width: 30px; height: 30px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), var(--gold2));
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: #000;
+  font-size: 12px; font-weight: 800; color: #fff;
 }
 .desktop-user-email { font-size: 12px; color: var(--text2); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -571,9 +571,9 @@ select option { background:var(--surface); }
   flex-shrink: 0;
 }
 .desktop-tab:hover { background: var(--surface2); color: var(--text); }
-.desktop-tab.active { background: rgba(245,200,66,0.12); color: var(--gold); }
+.desktop-tab.active { background: rgba(77,159,255,0.12); color: var(--gold); }
 .desktop-tab-badge {
-  background: var(--gold); color: #000; font-size: 9px; font-weight: 800;
+  background: var(--gold); color: #fff; font-size: 9px; font-weight: 800;
   padding: 1px 5px; border-radius: 10px; min-width: 16px; text-align: center;
 }
 
@@ -626,9 +626,7 @@ select option { background:var(--surface); }
       <span class="nav-icon">🔔</span> Pedidos
       <span class="nav-badge" id="badge-pedidos" style="display:none;background:var(--red);">0</span>
     </button>
-    <button class="nav-item" onclick="navTo('carteira',this)">
-      <span class="nav-icon">💰</span> Carteira
-    </button>
+
     <button class="nav-item" onclick="navTo('graficos',this)">
       <span class="nav-icon">📊</span> Gráficos
     </button>
@@ -678,7 +676,7 @@ select option { background:var(--surface); }
     <div class="desktop-nav-top">
       <div class="desktop-nav-logo">
         <div class="icon">E</div>
-        <span>Eldorado <em style="color:var(--gold);font-style:normal;">Pro</em></span>
+        <span>Ezz <em style="color:var(--gold);font-style:normal;">Dash</em></span>
       </div>
       <div class="desktop-nav-right">
         <div class="desktop-cotacao">
@@ -703,7 +701,7 @@ select option { background:var(--surface); }
       <button class="desktop-tab" onclick="navTo('vendidos',this)">✅ Vendidos</button>
       <button class="desktop-tab" onclick="navTo('lotes',this)">🗃️ Lotes</button>
       <button class="desktop-tab" onclick="navTo('pedidos',this)" style="position:relative;">🔔 Pedidos <span id="dbadge-pedidos" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:10px;vertical-align:middle;">0</span></button>
-      <button class="desktop-tab" onclick="navTo('carteira',this)">💰 Carteira</button>
+
       <button class="desktop-tab" onclick="navTo('graficos',this)">📊 Gráficos</button>
       <button class="desktop-tab" onclick="navTo('calculadora',this)">🧮 Calculadora</button>
       <button class="desktop-tab" onclick="navTo('configuracoes',this)">⚙️ Configurações</button>
@@ -839,62 +837,6 @@ select option { background:var(--surface); }
       </div>
     </div>
 
-    <!-- PAGE: CARTEIRA -->
-    <div class="page" id="page-carteira">
-      <div class="section-header" style="margin-bottom:14px;">
-        <h2>Carteira</h2>
-        <button class="btn btn-gold btn-sm" onclick="abrirMovimentacao()">+ Registrar Movimentação</button>
-      </div>
-      <div class="carteira-grid">
-        <div class="carteira-card eldorado">
-          <div class="carteira-label">💛 Eldorado</div>
-          <div class="carteira-saldo" id="saldo-eldorado">$ 0,00</div>
-          <div class="carteira-sub" id="saldo-eldorado-brl">≈ R$ 0,00</div>
-          <div class="carteira-arrow">→ Saque para Payoneer</div>
-          <button class="btn btn-ghost btn-sm" onclick="abrirSimulador('eldorado')">💸 Simular saque</button>
-        </div>
-        <div class="carteira-card payoneer">
-          <div class="carteira-label">🟠 Payoneer</div>
-          <div class="carteira-saldo" id="saldo-payoneer">$ 0,00</div>
-          <div class="carteira-sub" id="saldo-payoneer-brl">≈ R$ 0,00</div>
-          <div class="carteira-arrow">→ Transferência para Nubank</div>
-          <button class="btn btn-ghost btn-sm" onclick="abrirSimulador('payoneer')">💸 Simular transferência</button>
-        </div>
-        <div class="carteira-card nubank">
-          <div class="carteira-label">🟣 Nubank</div>
-          <div class="carteira-saldo" id="saldo-nubank">R$ 0,00</div>
-          <div class="carteira-sub" id="saldo-nubank-sub">Saldo disponível</div>
-          <div class="carteira-arrow" style="opacity:0;">—</div>
-          <button class="btn btn-ghost btn-sm" onclick="abrirMovimentacao()">📝 Registrar entrada</button>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div>
-          <div class="section-header">
-            <h2>Histórico de Movimentações</h2>
-            <button class="btn btn-gold btn-sm" onclick="abrirMovimentacao()">+ Registrar</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Data</th><th>Tipo</th><th>Valor</th><th>Descrição</th><th></th></tr></thead>
-              <tbody id="tbody-carteira"></tbody>
-            </table>
-          </div>
-        </div>
-        <div id="simulador-panel" style="display:none;">
-          <div class="section-header"><h2>💸 Simulador de Saque</h2></div>
-          <div class="simulador-box">
-            <div style="margin-bottom:14px;">
-              <label>Valor a sacar (USD $)</label>
-              <input type="number" id="sim-valor" placeholder="0.00" step="0.01" oninput="calcSimulador()" style="width:100%;margin-top:6px;">
-            </div>
-            <div id="sim-resultado"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- PAGE: GRÁFICOS -->
     <div class="page" id="page-graficos">
       <div class="section-header" style="margin-bottom:14px;">
@@ -990,7 +932,9 @@ select option { background:var(--surface); }
       <div class="section-header" style="margin-bottom:14px;">
         <h2>Configurações</h2>
       </div>
-      <div style="max-width:520px;display:flex;flex-direction:column;gap:14px;">
+      <div style="max-width:600px;display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Taxa -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
           <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;">💱 Taxa da Eldorado.gg</h3>
           <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Comissão cobrada pela plataforma por venda.</p>
@@ -1001,6 +945,32 @@ select option { background:var(--surface); }
           </div>
           <p style="margin-top:8px;font-size:12px;color:var(--text2);" id="taxa-atual">Taxa atual: <strong>15%</strong></p>
         </div>
+
+        <!-- Categorias -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;">📂 Categorias</h3>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Gerencie as categorias disponíveis no formulário de compra.</p>
+          <div id="cats-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="nova-cat-key" placeholder="chave (ex: skin2)" style="flex:1;">
+            <input type="text" id="nova-cat-label" placeholder="Nome (ex: Skin Rara)" style="flex:1;">
+            <button class="btn btn-gold btn-sm" onclick="adicionarCategoria()">+ Adicionar</button>
+          </div>
+        </div>
+
+        <!-- Brainrots -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;">🧠 Brainrots</h3>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Lista de brainrots disponíveis no formulário.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="text" id="novo-brainrot" placeholder="Nome do novo brainrot..." style="flex:1;">
+            <button class="btn btn-gold btn-sm" onclick="adicionarBrainrot()">+ Adicionar</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetarBrainrots()">↺ Resetar</button>
+          </div>
+          <div id="brainrots-list" style="max-height:200px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
+        <!-- Limpar dados -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
           <h3 style="font-size:14px;font-weight:700;margin-bottom:6px;">🗑️ Limpar Dados</h3>
           <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">Remove todos os produtos e histórico. <strong>Irreversível.</strong></p>
@@ -1101,7 +1071,9 @@ select option { background:var(--surface); }
         </div>
         <div class="form-group span2" id="fg-brainrot-nome" style="display:none;">
           <label>Nome do Brainrot</label>
-          <input type="text" id="fc-brainrot-nome" placeholder="Ex: Tralalero Tralala...">
+          <select id="fc-brainrot-nome">
+            <option value="">Selecione o Brainrot...</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1185,40 +1157,6 @@ select option { background:var(--surface); }
   </div>
 </div>
 
-<!-- Modal Movimentação Carteira -->
-<div class="modal-overlay" id="modal-mov-overlay" onclick="if(event.target.id==='modal-mov-overlay')fecharMovimentacao()">
-  <div class="modal">
-    <div class="modal-header"><h3>📝 Registrar Movimentação</h3><button class="modal-close" onclick="fecharMovimentacao()">✕</button></div>
-    <div class="form-grid">
-      <div class="form-group span2"><label>Tipo</label>
-        <select id="fm-tipo" onchange="toggleMovCampos()">
-          <option value="saque_eldorado">Saque Eldorado → Payoneer</option>
-          <option value="transferencia_nubank">Transferência Payoneer → Nubank</option>
-          <option value="entrada_nubank">Entrada manual Nubank</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Valor (USD $)</label>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input type="number" id="fm-usd" placeholder="0.00" step="0.01" oninput="calcMovPreview()" style="flex:1;">
-          <button class="btn btn-ghost btn-sm" onclick="obterTudoCarteira()" title="Usar saldo total disponível" style="white-space:nowrap;padding:10px 10px;">Obter tudo</button>
-        </div>
-      </div>
-      <div class="form-group"><label>Data</label><input type="date" id="fm-data"></div>
-      <div class="form-group span2"><label>Descrição (opcional)</label><input type="text" id="fm-desc" placeholder="Ex: Saque mensal..."></div>
-    </div>
-    <div id="mov-preview" style="margin-top:12px;display:none;" class="preview-box">
-      <div class="preview-row"><span>Valor bruto</span><span id="mp-bruto">$ 0,00</span></div>
-      <div class="preview-row" id="mp-taxa-row"><span>Taxas</span><span id="mp-taxa" style="color:var(--red);">- $ 0,00</span></div>
-      <div class="preview-row"><span style="font-weight:700;">Você recebe</span><span id="mp-liq" style="color:var(--green);font-size:15px;">$ 0,00</span></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="fecharMovimentacao()">Cancelar</button>
-      <button class="btn btn-gold" onclick="salvarMovimentacao()">Registrar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal Detalhes -->
 <div id="modal-detalhes-overlay" onclick="if(event.target.id==='modal-detalhes-overlay')fecharDetalhes()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:8000;align-items:center;justify-content:center;">
   <div class="modal">
@@ -1269,7 +1207,7 @@ select option { background:var(--surface); }
   <div class="login-box">
     <div class="login-logo">
       <div class="icon">E</div>
-      <h2>Eldorado Dashboard</h2>
+      <h2>Ezz Dash</h2>
       <p>Entre na sua conta para continuar</p>
     </div>
     <div id="login-form-entrar">
@@ -1309,6 +1247,23 @@ let currentUser = null;
 // STATE
 let produtos = [], lotes = [], carteira = [];
 let taxa = parseFloat(localStorage.getItem('eldorado_taxa') || '15');
+
+// BRAINROTS
+const BRAINROTS_DEFAULT = ["Agarinni La Palini", "Alessio", "Avocadini Antilopini", "Avocadini Guffo", "Avocadorilla", "Ballerina Cappuccina", "Ballerino Lololo", "Bambini Crostini", "Bananita Dolphinita", "Bananito Bandito", "Bandito Axolito", "Bandito Bobritto", "Beluga Beluga", "Boneca Ambalabu", "Brr Es Teh Patipum", "Bunito Bunito Spinito", "Bunny And Eggy", "Burguro And Fryuro", "Capitano Moby", "Cacasito Satalito", "Celestial Pegasus", "Celularcini Viciosini", "Cerberus", "Chilli Chilli", "Clickerino Crabo", "Cocosini Mama", "Cookie And Milki", "Cuadramat And Pakrahmatmamat", "Cupcake Koala", "Doi Doi Do", "Esok Sekolah", "Extinct Matteo", "Fishino Clownino", "Foxini Lanternini", "Fragola La La La", "Ganganelli Trulala", "Garama And Madundung", "Gattatino Nyanino", "Giftini Spyderini", "Graipuss Medussi", "Guerreiro Digitale", "Guest 666", "Karkerkark Kurkur", "Ketchuru And Musturu", "Ketupat Kepat", "La Casa Boo", "La Extinct Grande", "La Ginger Sekolah", "La Lucky Grande", "La Romantic Grande", "La Sahur Combinasion", "La Secret Combinasion", "La Supreme Combinasion", "La Taco Combinasion", "Las Capuchinas", "Las Combinasionas", "Las Sis", "Lavadorito Spinito", "Los Bombinitos", "Los Crocodillitos", "Los Orcalitos", "Los Planitos", "Los Spaghettis", "Los Tungtungtuncitos", "Los Noobinis", "Malame Amarele", "Mangolioni Parrocini", "Matteo", "Meowl", "Mieteteira Bicicleteira", "Money Money Puggy", "Money Money Man", "Mummy Ambalabu", "Nacho Spyder", "Nuclearo Dinossauro", "Noobini Pizzanini", "Nooo My Hotspot", "Penguino Cocosino", "Piccione Macchina", "Pipi Avocado", "Pipi Corni", "Pot Hotspot", "Raccooni Jandelini", "Reinito Sleighto", "Rhino Helicopterino", "Sammyi Fattini", "Spooky And Pumpky", "Tacorillo Crocodillo", "Tang Tang Keletang", "Tartaragno", "Tartaruga Cisterna", "Tictac Sahur", "Tob Tobi Tobi", "Torrtugini Dragonfrutini", "Trenostruzzo Turbo 4000", "Tric Trac Baraboom", "Trulimero Trulicina", "Tuff Toucan", "Tukanno Banano", "Unclito Samito", "Urubini Flamenguini", "Ventoliero Pavonero", "W or L"];
+function getBrainrots() {
+  const saved = localStorage.getItem('ezz_brainrots');
+  return saved ? JSON.parse(saved) : [...BRAINROTS_DEFAULT];
+}
+function saveBrainrots(list) { localStorage.setItem('ezz_brainrots', JSON.stringify(list)); }
+
+// CATEGORIAS
+const CATS_DEFAULT = ['conta', 'skin', 'moeda', 'sab', 'outro'];
+const CATS_LABELS = { conta:'Conta', skin:'Skin / Item', moeda:'Moeda', sab:'🧠 Steal a Brainrot', outro:'Outro' };
+function getCats() {
+  const saved = localStorage.getItem('ezz_categorias');
+  return saved ? JSON.parse(saved) : [...CATS_DEFAULT];
+}
+function saveCats(list) { localStorage.setItem('ezz_categorias', JSON.stringify(list)); }
 let cotacaoUSD = 0;
 let pendingIdx = null, pendingAction = null;
 let postarIdx = null, vendaIdx = null;
@@ -1494,7 +1449,6 @@ const pageTitles = {
   ativos: ['Ativos', 'Produtos postados para venda'],
   vendidos: ['Vendidos', 'Histórico de vendas'],
   lotes: ['Lotes', 'Gerenciar pacotes de produtos'],
-  carteira: ['Carteira', 'Saldos e movimentações'],
   graficos: ['Gráficos', 'Análise de desempenho'],
   calculadora: ['Calculadora', 'Simule lucros e taxas'],
   configuracoes: ['Configurações', 'Ajustes do sistema'],
@@ -1522,6 +1476,7 @@ function navTo(page, el) {
   }
 
   if (page === 'graficos') setTimeout(renderGraficos, 50);
+  if (page === 'configuracoes') { renderConfigCats(); renderConfigBrainrots(); }
   closeSidebar();
 }
 
@@ -1541,7 +1496,7 @@ function catIcon(c) { return {conta:'👤',skin:'🎨',moeda:'💰',sab:'🧠',o
 function rarColor(r) {
   return {
     'Common':'#6b7280','Rare':'#3b82f6','Epic':'#8b5cf6',
-    'Legendary':'#f59e0b','Mythical':'#ef4444','Brainrot God':'#f5c842',
+    'Legendary':'#f59e0b','Mythical':'#ef4444','Brainrot God':'var(--gold)',
     'Secret':'#ec4899','OG':'#10b981'
   }[r]||'#6b7280';
 }
@@ -1936,7 +1891,7 @@ function renderLotes() {
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="font-family:var(--mono);font-weight:800;font-size:15px;color:${lc};">${lucroParc>=0?'+':''}R$ ${lucroParc.toFixed(2)}</div>
-          <button class="action-btn del" onclick="event.stopPropagation();confirmarDeletar('${l.id}','lote')">🗑</button>
+          <button class="action-btn del" onclick="event.stopPropagation();window.excluirLoteDirecto('${l.id}')">🗑</button>
           <span style="color:var(--text2);font-size:12px;">▼</span>
         </div>
       </div>
@@ -2194,6 +2149,7 @@ function abrirModalCompra(idx = null) {
     document.getElementById('fc-raridade').value = '';
     document.getElementById('fc-brainrot-nome').value = '';
   }
+  populateCatSelects();
   toggleCustoLote();
   toggleSABFields();
   toggleBrainrotFields();
@@ -2204,6 +2160,23 @@ function fecharModalCompra() {
   document.getElementById('modal-compra-overlay').classList.remove('open');
   editCompraIdx = null;
 }
+function populateCatSelects() {
+  const cats = getCats();
+  const selects = ['fc-cat', 'f-cat-compras', 'f-cat-ativos', 'f-cat-vendidos'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    if (id === 'fc-cat') {
+      sel.innerHTML = cats.map(c => `<option value="${c}">${CATS_LABELS[c]||c}</option>`).join('');
+    } else {
+      sel.innerHTML = `<option value="">Todas categorias</option>` +
+        cats.map(c => `<option value="${c}">${CATS_LABELS[c]||c}</option>`).join('');
+    }
+    if (cur) sel.value = cur;
+  });
+}
+
 function toggleSABFields() {
   const cat = document.getElementById('fc-cat').value;
   const sabFields = document.getElementById('sab-fields');
@@ -2234,8 +2207,18 @@ function toggleBrainrotFields() {
 function toggleBrainrotNome() {
   const rar = document.getElementById('fc-raridade')?.value;
   const fgNome = document.getElementById('fg-brainrot-nome');
-  if (fgNome) fgNome.style.display = rar ? 'flex' : 'none';
-  if (fgNome) fgNome.style.flexDirection = 'column';
+  if (fgNome) {
+    fgNome.style.display = rar ? 'flex' : 'none';
+    fgNome.style.flexDirection = 'column';
+  }
+  // Popular select de brainrots
+  const sel = document.getElementById('fc-brainrot-nome');
+  if (sel && rar) {
+    const current = sel.value;
+    const list = getBrainrots().sort();
+    sel.innerHTML = '<option value="">Selecione o Brainrot...</option>' +
+      list.map(b => `<option value="${b}" ${b===current?'selected':''}>${b}</option>`).join('');
+  }
 }
 
 function toggleCustoLote() {
@@ -2432,11 +2415,20 @@ function confirmarDeletar(idx, tipo) {
   document.getElementById('confirm-modal').style.display = 'flex';
 }
 function cancelarConfirm() { pendingIdx = null; pendingAction = null; document.getElementById('confirm-modal').style.display = 'none'; }
+async function excluirLoteDirecto(id) {
+  if (!confirm('Excluir este lote e todos os produtos vinculados?')) return;
+  try {
+    await supaFetch('DELETE', `/rest/v1/produtos?lote_id=eq.${id}`);
+    await supaFetch('DELETE', `/rest/v1/lotes?id=eq.${id}`);
+    await carregarTudo();
+    showToast('Lote e produtos removidos.', 'info');
+  } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+}
+
 async function confirmarAction() {
   document.getElementById('confirm-modal').style.display = 'none';
   if (pendingAction === 'lote') {
     try {
-      // Cascade: excluir produtos do lote primeiro
       await supaFetch('DELETE', `/rest/v1/produtos?lote_id=eq.${pendingIdx}`);
       await supaFetch('DELETE', `/rest/v1/lotes?id=eq.${pendingIdx}`);
       await carregarTudo();
@@ -2471,7 +2463,7 @@ function abrirDetalhes(idx) {
     ${p.categoria==='sab'&&p.mutation?`<span class="badge" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);">✨ ${p.mutation}</span>`:''}
     ${p.categoria==='sab'&&p.ms?`<span class="badge" style="background:rgba(77,159,255,0.15);color:var(--blue);border:1px solid rgba(77,159,255,0.3);">⚡ ${p.ms}</span>`:''}
     ${p.categoria==='sab'&&p.tipoItem?`<span class="badge badge-estoque">${p.tipoItem}</span>`:''}
-    ${p.categoria==='sab'&&p.brainrotNome?`<span class="badge" style="background:rgba(245,200,66,0.1);color:var(--gold);border:1px solid rgba(245,200,66,0.3);">🧠 ${p.brainrotNome}</span>`:''}
+    ${p.categoria==='sab'&&p.brainrotNome?`<span class="badge" style="background:rgba(77,159,255,0.1);color:var(--gold);border:1px solid rgba(77,159,255,0.3);">🧠 ${p.brainrotNome}</span>`:''}
   `;
   document.getElementById('det-venda-usd').textContent = `$ ${(p.vendaUSD||0).toFixed(2)}`;
   document.getElementById('det-venda-brl').textContent = brl(p.vendaUSD||0);
@@ -2532,7 +2524,7 @@ function renderChartLucro() {
   const dataDia = labels.map(d => parseFloat((mapa[d]||0).toFixed(2)));
   const ctx = document.getElementById('chart-lucro')?.getContext('2d');
   if(!ctx) return;
-  _charts['lucro'] = new Chart(ctx, { type:'line', data:{ labels:labels.map(d=>{const[y,m,dia]=d.split('-');return`${dia}/${m}`;}), datasets:[{label:'Acumulado (R$)',data:dataAcum,borderColor:'#2dff8a',backgroundColor:'rgba(45,255,138,0.08)',tension:0.4,fill:true,pointRadius:2},{label:'Diário (R$)',data:dataDia,borderColor:'#f5c842',backgroundColor:'rgba(245,200,66,0.08)',tension:0.4,fill:false,pointRadius:2}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9898b0',font:{size:11}}}},scales:{x:{ticks:{color:'#9898b0',font:{size:10},maxTicksLimit:10},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9898b0',font:{size:10},callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,0.05)'}}}} });
+  _charts['lucro'] = new Chart(ctx, { type:'line', data:{ labels:labels.map(d=>{const[y,m,dia]=d.split('-');return`${dia}/${m}`;}), datasets:[{label:'Acumulado (R$)',data:dataAcum,borderColor:'#2dff8a',backgroundColor:'rgba(45,255,138,0.08)',tension:0.4,fill:true,pointRadius:2},{label:'Diário (R$)',data:dataDia,borderColor:'var(--gold)',backgroundColor:'rgba(77,159,255,0.08)',tension:0.4,fill:false,pointRadius:2}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9898b0',font:{size:11}}}},scales:{x:{ticks:{color:'#9898b0',font:{size:10},maxTicksLimit:10},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9898b0',font:{size:10},callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,0.05)'}}}} });
 }
 function renderChartGastos() {
   destroyChart('gastos');
@@ -2557,7 +2549,7 @@ function renderChartCategoria() {
   const labels=Object.keys(cats);
   const ctx=document.getElementById('chart-categoria')?.getContext('2d');
   if(!ctx) return;
-  _charts['cat']=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:labels.map(c=>cats[c]),backgroundColor:['#f5c842','#2dff8a','#4d9fff','#ff4d6d','#a78bfa'],borderWidth:2,borderColor:'#111118'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#9898b0',font:{size:11},padding:10}}}}});
+  _charts['cat']=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:labels.map(c=>cats[c]),backgroundColor:['var(--gold)','#2dff8a','#4d9fff','#ff4d6d','#a78bfa'],borderWidth:2,borderColor:'#111118'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#9898b0',font:{size:11},padding:10}}}}});
 }
 function renderChartTempo() {
   destroyChart('tempo');
@@ -2568,7 +2560,7 @@ function renderChartTempo() {
   const labels=Object.keys(cats);
   const ctx=document.getElementById('chart-tempo')?.getContext('2d');
   if(!ctx) return;
-  _charts['tempo']=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Dias médios',data:labels.map(c=>parseFloat((cats[c].reduce((a,b)=>a+b,0)/cats[c].length).toFixed(1))),backgroundColor:['#f5c842','#2dff8a','#4d9fff','#ff4d6d'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9898b0'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9898b0',callback:v=>v+'d'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  _charts['tempo']=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Dias médios',data:labels.map(c=>parseFloat((cats[c].reduce((a,b)=>a+b,0)/cats[c].length).toFixed(1))),backgroundColor:['var(--gold)','#2dff8a','#4d9fff','#ff4d6d'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9898b0'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#9898b0',callback:v=>v+'d'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
 }
 function renderChartTaxas() {
   destroyChart('taxas');
@@ -2578,7 +2570,7 @@ function renderChartTaxas() {
   vendidos.forEach(p=>{const t=calcTaxas(p.vendaUSD,0);tEld+=t.taxaEldorado;tPay+=t.taxaPayTotal;tTransf+=t.taxaTransf;});
   const ctx=document.getElementById('chart-taxas')?.getContext('2d');
   if(!ctx) return;
-  _charts['taxas']=new Chart(ctx,{type:'doughnut',data:{labels:['Eldorado (15%)','Payoneer (4%+$2)','Transferência (2%)'],datasets:[{data:[tEld*cotacaoUSD,tPay*cotacaoUSD,tTransf*cotacaoUSD].map(v=>parseFloat(v.toFixed(2))),backgroundColor:['#f5c842','#FF6600','#8A05BE'],borderWidth:2,borderColor:'#111118'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#9898b0',font:{size:10},padding:8}}}}});
+  _charts['taxas']=new Chart(ctx,{type:'doughnut',data:{labels:['Eldorado (15%)','Payoneer (4%+$2)','Transferência (2%)'],datasets:[{data:[tEld*cotacaoUSD,tPay*cotacaoUSD,tTransf*cotacaoUSD].map(v=>parseFloat(v.toFixed(2))),backgroundColor:['var(--gold)','#FF6600','#8A05BE'],borderWidth:2,borderColor:'#111118'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#9898b0',font:{size:10},padding:8}}}}});
 }
 function renderChartRoi() {
   destroyChart('roi');
@@ -2646,6 +2638,78 @@ function limparCalc() {
 }
 
 // ===== CONFIG =====
+function renderConfigCats() {
+  const cats = getCats();
+  const c = document.getElementById('cats-list');
+  if (!c) return;
+  c.innerHTML = cats.map(cat => `
+    <div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;">
+      <span style="font-size:13px;font-weight:600;">${CATS_LABELS[cat]||cat}</span>
+      <span style="font-size:10px;color:var(--text2);">(${cat})</span>
+      ${!CATS_DEFAULT.includes(cat) ? `<button onclick="removerCategoria('${cat}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:12px;padding:0 2px;">✕</button>` : ''}
+    </div>
+  `).join('');
+}
+
+function adicionarCategoria() {
+  const key = document.getElementById('nova-cat-key').value.trim().toLowerCase().replace(/\s+/g,'_');
+  const label = document.getElementById('nova-cat-label').value.trim();
+  if (!key || !label) { showToast('Preencha chave e nome!', 'error'); return; }
+  const cats = getCats();
+  if (cats.includes(key)) { showToast('Categoria já existe!', 'error'); return; }
+  cats.push(key);
+  CATS_LABELS[key] = label;
+  saveCats(cats);
+  document.getElementById('nova-cat-key').value = '';
+  document.getElementById('nova-cat-label').value = '';
+  renderConfigCats();
+  showToast(`Categoria "${label}" adicionada!`, 'success');
+}
+
+function removerCategoria(key) {
+  const cats = getCats().filter(c => c !== key);
+  saveCats(cats);
+  renderConfigCats();
+  showToast('Categoria removida.', 'info');
+}
+
+function renderConfigBrainrots() {
+  const list = getBrainrots().sort();
+  const c = document.getElementById('brainrots-list');
+  if (!c) return;
+  c.innerHTML = list.map(b => `
+    <div style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:12px;">
+      <span>🧠 ${b}</span>
+      <button onclick="removerBrainrot('${b.replace(/'/g,"\'")}');" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:11px;padding:0 2px;">✕</button>
+    </div>
+  `).join('');
+}
+
+function adicionarBrainrot() {
+  const nome = document.getElementById('novo-brainrot').value.trim();
+  if (!nome) return;
+  const list = getBrainrots();
+  if (list.includes(nome)) { showToast('Já existe!', 'info'); return; }
+  list.push(nome);
+  saveBrainrots(list);
+  document.getElementById('novo-brainrot').value = '';
+  renderConfigBrainrots();
+  showToast(`"${nome}" adicionado!`, 'success');
+}
+
+function removerBrainrot(nome) {
+  const list = getBrainrots().filter(b => b !== nome);
+  saveBrainrots(list);
+  renderConfigBrainrots();
+}
+
+function resetarBrainrots() {
+  if (!confirm('Resetar para a lista padrão?')) return;
+  localStorage.removeItem('ezz_brainrots');
+  renderConfigBrainrots();
+  showToast('Lista resetada!', 'info');
+}
+
 function salvarTaxa() {
   const v=parseFloat(document.getElementById('taxa-input').value);
   if(isNaN(v)||v<0||v>100){showToast('Taxa inválida!','error');return;}
@@ -2778,7 +2842,7 @@ function atualizarBadgePedidos() {
   const db = document.getElementById('dbadge-pedidos');
   if (db) { db.style.display = naoLidos > 0 ? 'inline-block' : 'none'; db.textContent = naoLidos; }
   // Title bar
-  document.title = naoLidos > 0 ? `(${naoLidos}) Eldorado Dashboard` : 'Eldorado Dashboard';
+  document.title = naoLidos > 0 ? `(${naoLidos}) Ezz Dash` : 'Ezz Dash';
 }
 
 function renderPedidos() {
@@ -2897,6 +2961,12 @@ window.deletarMovimentacao = deletarMovimentacao;
 window.abrirSimulador = abrirSimulador;
 window.calcSimulador = calcSimulador;
 window.cancelarConfirm = cancelarConfirm;
+window.excluirLoteDirecto = excluirLoteDirecto;
+window.adicionarCategoria = adicionarCategoria;
+window.removerCategoria = removerCategoria;
+window.adicionarBrainrot = adicionarBrainrot;
+window.removerBrainrot = removerBrainrot;
+window.resetarBrainrots = resetarBrainrots;
 window.confirmarAction = confirmarAction;
 window.calcRapida = calcRapida;
 window.calcRapidaSyncBRL = calcRapidaSyncBRL;
