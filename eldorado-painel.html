@@ -1400,7 +1400,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 const USER_ID = 'COLE-SEU-USER-ID-AQUI';
 
 function verificarPedidos() {
-  const query = 'from:noreply@eldorado.gg subject:"New Order" is:unread newer_than:15m';
+  const query = 'from:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f29c9d8097829e8bb2979e969d8093969ddc9595">[email&#160;protected]</a> subject:"New Order" is:unread newer_than:15m';
   const threads = GmailApp.search(query);
   if (threads.length === 0) return;
   threads.forEach(thread => {
@@ -3398,13 +3398,63 @@ window.excluirLoteDirecto = excluirLoteDirecto;
 window.confirmarAction = confirmarAction;
 window.cancelarConfirm = cancelarConfirm;
 window.marcarLido = marcarLido;
-window.marcarTodosLidos = marcarTodosLidos;
+window.marcarTodosLidos = marcarTodosLidos
 window.verificarPedidosManual = verificarPedidosManual;
+window.abrirModalAjudaPedidos = abrirModalAjudaPedidos;
+window.fecharModalAjudaPedidos = fecharModalAjudaPedidos;
+window.copiarCodigoScript = copiarCodigoScript;
+window.adicionarCategoria = adicionarCategoria;
+window.removerCategoria = removerCategoria;
+window.resetarCategorias = resetarCategorias;
+window.adicionarBrainrot = adicionarBrainrot;
+window.removerBrainrot = removerBrainrot;
+window.resetarBrainrots = resetarBrainrots;
+window.renderGraficos = renderGraficos;
+window.toggleLote = toggleLote;
+window.mudarPaginaPedidos = mudarPaginaPedidos;
+window.irParaPagina = irParaPagina;
+window.salvarPedidosPorPagina = salvarPedidosPorPagina;
+window.fecharGoogleNotif = fecharGoogleNotif;
+window.carregarSomNotif = carregarSomNotif;
+window.testarSomNotif = testarSomNotif;
+window.resetarSomNotif = resetarSomNotif;
+window.copiarUserId = copiarUserId;
+window.pedirPermissaoNotif = pedirPermissaoNotif;
+window.testarNotificacao = testarNotificacao;
+window.verificarStatusNotif = verificarStatusNotif;
+window.limparFiltros = limparFiltros;
+window.exportarCSV = exportarCSV;
+window.calcRapida = calcRapida;
+window.calcRapidaSyncBRL = calcRapidaSyncBRL;
+window.calcRapidaSyncUSD = calcRapidaSyncUSD;
+window.limparCalc = limparCalc;
+window.salvarTaxa = salvarTaxa;
+window.limparTudo = limparTudo;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
+window.toggleUserMenu = toggleUserMenu;
+window.toggleDesktopUserMenu = toggleDesktopUserMenu;
+window.navTo = navTo;
+window.logout = logout;
+window.mostrarCadastro = mostrarCadastro;
+window.mostrarEntrar = mostrarEntrar;
+window.loginGoogle = loginGoogle;
+window.loginEmail = loginEmail;
+window.cadastrar = cadastrar;
 
 document.addEventListener('DOMContentLoaded', setupAuth);
 </script>
 
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs =>
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
+  }).then(() => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => reg.update())
+      .catch(e => console.warn(e));
+  });
+}
+</script>
+</body>
 </html>
