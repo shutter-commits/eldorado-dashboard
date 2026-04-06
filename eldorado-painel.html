@@ -373,19 +373,6 @@ select option { background:var(--surface); }
 .det-row { display:flex; justify-content:space-between; align-items:center; padding:7px 14px; font-size:13px; color:var(--text2); }
 
 /* ===== CARTEIRA ===== */
-.carteira-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
-.carteira-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius); padding:20px; position:relative; overflow:hidden;
-}
-.carteira-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-.carteira-card.eldorado::before { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
-.carteira-card.payoneer::before { background:linear-gradient(90deg,#FF6600,#FF8C00); }
-.carteira-card.nubank::before { background:linear-gradient(90deg,#8A05BE,#6B04A8); }
-.carteira-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:6px; }
-.carteira-saldo { font-size:28px; font-weight:800; font-family:var(--mono); margin-bottom:4px; }
-.carteira-sub { font-size:11px; color:var(--text2); margin-bottom:14px; }
-.carteira-arrow { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text2); margin-bottom:12px; }
 
 /* ===== SIMULADOR ===== */
 .simulador-box {
@@ -524,8 +511,7 @@ select option { background:var(--surface); }
   #desktop-nav { display: none !important; }
   #desktop-summary { display: none !important; }
   .summary-grid { grid-template-columns:1fr 1fr; gap:10px; }
-  .carteira-grid { grid-template-columns:1fr; }
-  .graficos-grid { grid-template-columns:1fr; }
+    .graficos-grid { grid-template-columns:1fr; }
   .chart-card.full { grid-column:span 1; }
   .table-wrap { overflow-x:auto; }
   .table-wrap table { min-width:580px; }
@@ -1495,7 +1481,7 @@ let sbClient = null;
 let currentUser = null;
 
 // STATE
-let produtos = [], lotes = [], carteira = [];
+let produtos = [], lotes = [];
 let taxa = parseFloat(localStorage.getItem('eldorado_taxa') || '15');
 
 // BRAINROTS
@@ -2195,55 +2181,7 @@ function toggleLote(id) {
 }
 
 // ===== RENDER CARTEIRA =====
-function renderCarteira() {
-  // Calcular saldos
-  const vendas = produtos.filter(p => p.status === 'vendido');
-  const totalVendasUSD = vendas.reduce((a,p) => a + (calcTaxas(p.vendaUSD||0,0).creditoPayoneer), 0);
-  
-  // Movimentações
-  const saquesEld = carteira.filter(m => m.tipo === 'saque_eldorado').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
-  const transfPay = carteira.filter(m => m.tipo === 'transferencia_nubank').reduce((a,m) => a + (parseFloat(m.valor_usd)||0), 0);
-  const entradasNu = carteira.filter(m => m.tipo === 'entrada_nubank').reduce((a,m) => a + (parseFloat(m.valor_brl)||0), 0);
 
-  const saldoEld = Math.max(0, totalVendasUSD - saquesEld);
-  const saldoPay = Math.max(0, saquesEld - transfPay);
-  // Calcular BRL da Payoneer após taxas
-  const transfPayBRL = carteira.filter(m => m.tipo === 'transferencia_nubank').reduce((a,m) => a + (parseFloat(m.valor_brl)||0), 0);
-  const saldoNu = transfPayBRL + entradasNu;
-
-  document.getElementById('saldo-eldorado').textContent = `$ ${saldoEld.toFixed(2)}`;
-  document.getElementById('saldo-eldorado-brl').textContent = `≈ R$ ${(saldoEld*cotacaoUSD).toFixed(2)}`;
-  document.getElementById('saldo-payoneer').textContent = `$ ${saldoPay.toFixed(2)}`;
-  document.getElementById('saldo-payoneer-brl').textContent = `≈ R$ ${(saldoPay*cotacaoUSD).toFixed(2)}`;
-  document.getElementById('saldo-nubank').textContent = `R$ ${saldoNu.toFixed(2)}`;
-
-  // Histórico
-  const tb = document.getElementById('tbody-carteira');
-  if (carteira.length === 0) {
-    tb.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">💰</div><p>Nenhuma movimentação registrada.</p></div></td></tr>`;
-    return;
-  }
-  const tipos = { saque_eldorado:'💛 Saque Eldorado→Pay', transferencia_nubank:'🟠 Transferência Pay→Nu', entrada_nubank:'🟣 Entrada Nubank' };
-  tb.innerHTML = carteira.map(m => {
-    const val = m.valor_usd > 0 ? `$ ${parseFloat(m.valor_usd).toFixed(2)}` : `R$ ${parseFloat(m.valor_brl).toFixed(2)}`;
-    return `<tr>
-      <td class="mono" style="font-size:12px;">${fmtDate((m.criado_em||'').split('T')[0])}</td>
-      <td>${tipos[m.tipo]||m.tipo}</td>
-      <td class="mono" style="font-weight:700;color:var(--blue);">${val}</td>
-      <td style="font-size:12px;color:var(--text2);">${m.descricao||'—'}</td>
-      <td><div class="action-btns"><button class="action-btn del" onclick="deletarMovimentacao('${m.id}')">🗑</button></div></td>
-    </tr>`;
-  }).join('');
-}
-
-// ===== CARTEIRA MODALS =====
-
-
-
-// ===== SIMULADOR =====
-
-
-// ===== MODAL COMPRA =====
 function abrirModalCompra(idx = null) {
   editCompraIdx = idx;
   document.getElementById('modal-compra-title').textContent = idx !== null ? '✏️ Editar Compra' : '🛒 Nova Compra';
@@ -2491,16 +2429,8 @@ async function confirmarVenda() {
       data_venda: data, usd_recebido: usd, brl_recebido: brl,
       lucro_real: lucro, dias_para_vender: dias, cotacao_venda: cotacaoUSD
     });
-    // Registrar na carteira automaticamente
-    const t = calcTaxas(usd, 0);
-    await supaFetch('POST', '/rest/v1/carteira', {
-      tipo: 'venda', origem: 'eldorado', destino: 'eldorado',
-      valor_usd: t.creditoPayoneer, valor_brl: t.creditoPayoneer*cotacaoUSD,
-      descricao: `Venda: ${p.nome}`, user_id: currentUser?.id
-    });
     fecharModalVenda();
     await carregarProdutos();
-    await carregarCarteira();
     renderAll();
     showToast(`Venda registrada! +R$ ${lucro.toFixed(2)}`, 'success');
   } catch(e) { showToast('Erro: ' + e.message, 'error'); }
