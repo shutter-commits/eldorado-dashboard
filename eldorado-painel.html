@@ -1033,6 +1033,48 @@ select option { background:var(--surface); }
           <p style="margin-top:8px;font-size:11px;color:var(--text2);">Use este ID na variável <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-family:var(--mono);">USER_ID</code> do Apps Script.</p>
         </div>
 
+        <!-- Notificações -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;grid-column:span 2;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;">🔔 Notificações do Sistema</div>
+          <div id="notif-status" style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;border-radius:10px;background:var(--surface2);">
+            <span id="notif-status-icon" style="font-size:20px;">⏳</span>
+            <div>
+              <div id="notif-status-txt" style="font-size:13px;font-weight:600;">Verificando...</div>
+              <div id="notif-status-sub" style="font-size:11px;color:var(--text2);margin-top:2px;"></div>
+            </div>
+            <button id="notif-btn" class="btn btn-gold btn-sm" style="margin-left:auto;display:none;" onclick="pedirPermissaoNotif()">Ativar notificações</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+              <div style="font-size:12px;font-weight:700;margin-bottom:8px;">🪟 Windows</div>
+              <ol style="font-size:12px;color:var(--text2);line-height:1.8;padding-left:16px;margin:0;">
+                <li>Configurações → Sistema</li>
+                <li>Notificações e Ações</li>
+                <li>Ative <strong>Google Chrome</strong></li>
+                <li>Desative <strong>Não Perturbe</strong></li>
+              </ol>
+            </div>
+            <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+              <div style="font-size:12px;font-weight:700;margin-bottom:8px;">🍎 Mac</div>
+              <ol style="font-size:12px;color:var(--text2);line-height:1.8;padding-left:16px;margin:0;">
+                <li>Preferências do Sistema</li>
+                <li>Notificações e Foco</li>
+                <li>Ative <strong>Google Chrome</strong></li>
+                <li>Desative <strong>Não Perturbe</strong></li>
+              </ol>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;">🌐 No Chrome</div>
+            <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Clique no cadeado 🔒 na barra de endereço → Notificações → Permitir</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="window.open('chrome://settings/content/notifications')">⚙️ Abrir config Chrome</button>
+              <button class="btn btn-ghost btn-sm" onclick="testarNotificacao()">🔔 Testar notificação</button>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--text2);">💡 As notificações aparecem no canto da tela mesmo com o Chrome minimizado, desde que esteja aberto.</p>
+        </div>
+
         <!-- Limpar dados -->
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;">
           <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:10px;">🗑️ Limpar Dados</div>
@@ -1358,7 +1400,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 const USER_ID = 'COLE-SEU-USER-ID-AQUI';
 
 function verificarPedidos() {
-  const query = 'from:<strong><strong>api@eldorado.gg</strong></strong> subject:"New Order" is:unread newer_than:15m';
+  const query = 'from:noreply@eldorado.gg subject:"New Order" is:unread newer_than:15m';
   const threads = GmailApp.search(query);
   if (threads.length === 0) return;
   threads.forEach(thread => {
@@ -1695,6 +1737,7 @@ function navTo(page, el) {
     if (uidEl && currentUser) uidEl.value = currentUser.id || '';
     const ppEl = document.getElementById('pedidos-por-pagina');
     if (ppEl) ppEl.value = getPedidosPorPagina().toString();
+    setTimeout(verificarStatusNotif, 100);
   }
   closeSidebar();
 }
@@ -2846,6 +2889,53 @@ function resetarBrainrots() {
   showToast('Lista resetada!', 'info');
 }
 
+function verificarStatusNotif() {
+  const icon = document.getElementById('notif-status-icon');
+  const txt = document.getElementById('notif-status-txt');
+  const sub = document.getElementById('notif-status-sub');
+  const btn = document.getElementById('notif-btn');
+  if (!icon) return;
+  if (!('Notification' in window)) {
+    icon.textContent = '❌'; txt.textContent = 'Não suportado';
+    sub.textContent = 'Seu navegador não suporta notificações.';
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    icon.textContent = '✅'; txt.textContent = 'Notificações ativadas';
+    sub.textContent = 'Você receberá notificações quando chegar um novo pedido.';
+    if (btn) btn.style.display = 'none';
+  } else if (Notification.permission === 'denied') {
+    icon.textContent = '❌'; txt.textContent = 'Notificações bloqueadas';
+    sub.textContent = 'Desbloqueie nas configurações do Chrome (cadeado 🔒 na barra de endereço).';
+    if (btn) btn.style.display = 'none';
+  } else {
+    icon.textContent = '⚠️'; txt.textContent = 'Permissão necessária';
+    sub.textContent = 'Clique em "Ativar notificações" para receber alertas de novos pedidos.';
+    if (btn) btn.style.display = 'block';
+  }
+}
+
+async function pedirPermissaoNotif() {
+  const perm = await Notification.requestPermission();
+  verificarStatusNotif();
+  if (perm === 'granted') showToast('Notificações ativadas!', 'success');
+  else showToast('Permissão negada. Ative manualmente no Chrome.', 'error');
+}
+
+function testarNotificacao() {
+  if (Notification.permission !== 'granted') {
+    showToast('Ative as notificações primeiro!', 'error');
+    return;
+  }
+  const n = new Notification('🔔 Ezz Dash — Teste', {
+    body: 'Novo pedido! Steal a Brainrot — $20.96',
+    icon: './icon-192.png'
+  });
+  tocarSom();
+  mostrarGoogleNotif('🔔 Teste de notificação!', 'Steal a Brainrot — $20.96');
+  showToast('Notificação de teste enviada!', 'success');
+}
+
 function copiarUserId() {
   const el = document.getElementById('user-id-display');
   if (!el || !el.value || el.value === 'Faça login para ver') {
@@ -3260,6 +3350,9 @@ window.adicionarCategoria = adicionarCategoria;
 window.removerCategoria = removerCategoria;
 window.resetarCategorias = resetarCategorias;
 window.copiarUserId = copiarUserId;
+window.pedirPermissaoNotif = pedirPermissaoNotif;
+window.testarNotificacao = testarNotificacao;
+window.verificarStatusNotif = verificarStatusNotif;
 window.fecharGoogleNotif = fecharGoogleNotif;
 window.mudarPaginaPedidos = mudarPaginaPedidos;
 window.irParaPagina = irParaPagina;
@@ -3289,6 +3382,9 @@ window.carregarSomNotif = carregarSomNotif;
 window.testarSomNotif = testarSomNotif;
 window.resetarSomNotif = resetarSomNotif;
 window.copiarUserId = copiarUserId;
+window.pedirPermissaoNotif = pedirPermissaoNotif;
+window.testarNotificacao = testarNotificacao;
+window.verificarStatusNotif = verificarStatusNotif;
 window.abrirModalAjudaPedidos = abrirModalAjudaPedidos;
 window.fecharModalAjudaPedidos = fecharModalAjudaPedidos;
 window.copiarCodigoScript = copiarCodigoScript;
@@ -3310,14 +3406,5 @@ document.addEventListener('DOMContentLoaded', setupAuth);
 
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(reg => reg.unregister());
-  }).then(() => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(reg => reg.update())
-      .catch(e => console.warn(e));
-  });
-}
-</script>
-</body>
+  navigator.serviceWorker.getRegistrations().then(regs =>
 </html>
